@@ -52,7 +52,7 @@ module sp_ram
 
   genvar w;
   generate for(w = 0; w < DATA_WIDTH/8; w++)
-    begin
+    begin : sr0
       assign wdata[w] = wdata_i[(w+1)*8-1:w*8];
     end
   endgenerate
