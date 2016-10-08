@@ -44,7 +44,25 @@ module sp_ram_wrap
 
   // TODO: we should kill synthesis when the ram size is larger than what we
   // have here
+`elsif PULP_QUARTUS_EMUL
+  // Trying if simulation model synthesizes to RAMs
+  sp_ram
+  #(
+    .ADDR_WIDTH ( ADDR_WIDTH ),
+    .DATA_WIDTH ( DATA_WIDTH ),
+    .NUM_WORDS  ( RAM_SIZE   )
+  )
+  sp_ram_i
+  (
+    .clk     ( clk       ),
 
+    .en_i    ( en_i      ),
+    .addr_i  ( addr_i    ),
+    .wdata_i ( wdata_i   ),
+    .rdata_o ( rdata_o   ),
+    .we_i    ( we_i      ),
+    .be_i    ( be_i      )
+  );
 `elsif ASIC
    // RAM bypass logic
    logic [31:0] ram_out_int;

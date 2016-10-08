@@ -48,7 +48,12 @@ module clk_rst_gen
   // FLL
   //----------------------------------------------------------------------------//
 
-`ifdef ASIC
+`ifdef PULP_QUARTUS_EMUL
+  assign fll_ack_o    = fll_req_i;
+  assign fll_r_data_o = 1'b0;
+  assign fll_lock_o   = 1'b0;
+  assign scan_o       = 1'b0;
+`elsif ASIC
   umcL65_LL_FLL
   fll_i
   (
