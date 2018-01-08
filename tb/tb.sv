@@ -69,7 +69,8 @@ module tb;
   uart_bus
   #(
     .BAUD_RATE(BAUDRATE),
-    .PARITY_EN(0)
+    .PARITY_EN(0),
+    .CLK_PERIOD(`CLK_PERIOD)
   )
   uart
   (
@@ -159,7 +160,7 @@ module tb;
     .gpio_in           ( gpio_in      ),
     .gpio_out          ( gpio_out     ),
     .gpio_dir          ( gpio_dir     ),
-    .gpio_padcfg       (              ),
+//    .gpio_padcfg       (              ),
 
     .tck_i             ( jtag_if.tck     ),
     .trstn_i           ( jtag_if.trstn   ),
@@ -315,7 +316,11 @@ module tb;
 
   // TODO: this is a hack, do it properly!
   `include "tb_spi_pkg.sv"
-  `include "tb_mem_pkg.sv"
+  `ifdef ASIC
+   `include "tb_ntl_mem_pkg.sv"
+  `else
+   `include "tb_mem_pkg.sv"
+  `endif
   `include "spi_debug_test.svh"
   `include "mem_dpi.svh"
 

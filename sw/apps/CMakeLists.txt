@@ -173,6 +173,7 @@ if(${RISCV})
   add_subdirectory(riscv_tests)
   add_subdirectory(freertos)
   add_subdirectory(boot_code)
+  add_subdirectory(brainwave)
 endif()
 
 add_subdirectory(sequential_tests)

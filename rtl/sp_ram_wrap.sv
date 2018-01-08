@@ -64,27 +64,43 @@ module sp_ram_wrap
     .be_i    ( be_i      )
   );
 `elsif ASIC
-   // RAM bypass logic
-   logic [31:0] ram_out_int;
-   // assign rdata_o = (bypass_en_i) ? wdata_i : ram_out_int;
-   assign rdata_o = ram_out_int;
+`ifndef TSMC40
+  sp_ram
+  #(
+    .ADDR_WIDTH ( ADDR_WIDTH ),
+    .DATA_WIDTH ( DATA_WIDTH ),
+    .NUM_WORDS  ( RAM_SIZE   )
+  )
+  sp_ram_i
+  (
+    .clk     ( clk       ),
 
-   sp_ram_bank
-   #(
-    .NUM_BANKS  ( RAM_SIZE/4096 ),
-    .BANK_SIZE  ( 1024          )
-   )
-   sp_ram_bank_i
-   (
-    .clk_i   ( clk                     ),
-    .rstn_i  ( rstn_i                  ),
-    .en_i    ( en_i                    ),
-    .addr_i  ( addr_i                  ),
-    .wdata_i ( wdata_i                 ),
-    .rdata_o ( ram_out_int             ),
-    .we_i    ( (we_i & ~bypass_en_i)   ),
-    .be_i    ( be_i                    )
-   );
+    .en_i    ( en_i      ),
+    .addr_i  ( addr_i    ),
+    .wdata_i ( wdata_i   ),
+    .rdata_o ( rdata_o   ),
+    .we_i    ( we_i      ),
+    .be_i    ( be_i      )
+  );
+`else
+  sp_ram
+  #(
+    .ADDR_WIDTH ( ADDR_WIDTH ),
+    .DATA_WIDTH ( DATA_WIDTH ),
+    .NUM_WORDS  ( RAM_SIZE   )
+  )
+  sp_ram_i
+  (
+    .clk     ( clk       ),
+
+    .en_i    ( en_i      ),
+    .addr_i  ( addr_i    ),
+    .wdata_i ( wdata_i   ),
+    .rdata_o ( rdata_o   ),
+    .we_i    ( we_i      ),
+    .be_i    ( be_i      )
+  );
+`endif
 
 `else
   sp_ram

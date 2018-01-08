@@ -48,12 +48,18 @@ module clk_rst_gen
   // FLL
   //----------------------------------------------------------------------------//
 
-`ifdef PULP_QUARTUS_EMUL
+`ifndef ASIC
   assign fll_ack_o    = fll_req_i;
   assign fll_r_data_o = 1'b0;
   assign fll_lock_o   = 1'b0;
   assign scan_o       = 1'b0;
-`elsif ASIC
+`elsif TSMC40
+  // Insert FLL for TSMC40
+  assign fll_ack_o    = fll_req_i;
+  assign fll_r_data_o = 1'b0;
+  assign fll_lock_o   = 1'b0;
+  assign scan_o       = 1'b0;
+`else
   umcL65_LL_FLL
   fll_i
   (
@@ -75,11 +81,6 @@ module clk_rst_gen
     .TD         ( scan_i            ),
     .TQ         ( scan_o            )
   );
-`else
-  assign fll_ack_o    = fll_req_i;
-  assign fll_r_data_o = 1'b0;
-  assign fll_lock_o   = 1'b0;
-  assign scan_o       = 1'b0;
 `endif
 
   //----------------------------------------------------------------------------//

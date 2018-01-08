@@ -196,7 +196,7 @@ class adv_dbg_if_t;
 
    task jtag_softreset();
       jtag_cluster_dbg.jtag_softreset();
-   endtask;
+   endtask
 
    task init();
       jtag_cluster_dbg.setIR();
