@@ -120,12 +120,14 @@ module tb;
   );
 
   pulpino_top
+`ifndef SYNTHESIS
   #(
     .USE_ZERO_RISCY    ( USE_ZERO_RISCY ),
     .RISCY_RV32F       ( RISCY_RV32F    ),
     .ZERO_RV32M        ( ZERO_RV32M     ),
     .ZERO_RV32E        ( ZERO_RV32E     )
    )
+`endif
   top_i
   (
     .clk               ( s_clk        ),
@@ -180,7 +182,7 @@ module tb;
     .gpio_in           ( gpio_in      ),
     .gpio_out          ( gpio_out     ),
     .gpio_dir          ( gpio_dir     ),
-    .gpio_padcfg       (              ),
+    //.gpio_padcfg       (              ), // throws error in synthesis: signal [31:0][5:0]gpio_padcfg; => not verilog
 
     .tck_i             ( jtag_if.tck     ),
     .trstn_i           ( jtag_if.trstn   ),

@@ -3,6 +3,8 @@ MESSAGE(STATUS "RISCY_RV32F= ${RISCY_RV32F}")
 MESSAGE(STATUS "ZERO_RV32M= ${ZERO_RV32M}")
 MESSAGE(STATUS "ZERO_RV32E= ${ZERO_RV32E}")
 MESSAGE(STATUS "PL_NETLIST= ${PL_NETLIST}")
+MESSAGE("CMAKE_OBJCOPY= " ${CMAKE_OBJCOPY})
+MESSAGE("CMAKE_OBJDUMP= " ${CMAKE_OBJDUMP})
 
 macro(add_sim_targets NAME)
   set(SETENV "env VSIM_DIR=${PULP_MODELSIM_DIRECTORY} USE_ZERO_RISCY=${USE_ZERO_RISCY} RISCY_RV32F=${RISCY_RV32F} ZERO_RV32M=${ZERO_RV32M} ZERO_RV32E=${ZERO_RV32E} PL_NETLIST=${PL_NETLIST} TB_TEST=\"$<TARGET_PROPERTY:${NAME}.elf,TB_TEST>\"")
@@ -77,7 +79,7 @@ macro(add_sim_targets NAME)
   add_custom_target(${NAME}.vsim
     COMMAND ${CMAKE_COMMAND} -E remove stdout/*
     COMMAND ${CMAKE_COMMAND} -E remove FS/*
-    COMMAND tcsh -c "${SETENV} ${VSIM}  -64 -do 'source tcl_files/$<TARGET_PROPERTY:${NAME}.elf,TB>\\;'"
+    COMMAND tcsh -c "${SETENV} ${VSIM} -novopt -64 -do 'source tcl_files/$<TARGET_PROPERTY:${NAME}.elf,TB>\\;'"
     WORKING_DIRECTORY ./${SUBDIR}
     DEPENDS ${NAME}.slm.cmd ${NAME}.stim.txt ${NAME}.links
     COMMENT "Running ${NAME} in ModelSim"
@@ -87,7 +89,7 @@ macro(add_sim_targets NAME)
   add_custom_target(${NAME}.vsimc
     COMMAND ${CMAKE_COMMAND} -E remove stdout/*
     COMMAND ${CMAKE_COMMAND} -E remove FS/*
-    COMMAND tcsh -c "${SETENV} ${VSIM}  -c -64 -do 'source tcl_files/$<TARGET_PROPERTY:${NAME}.elf,TB>\\; run -a\\; exit\\;' >vsim.log"
+    COMMAND tcsh -c "${SETENV} ${VSIM} -novopt -c -64 -do 'source tcl_files/$<TARGET_PROPERTY:${NAME}.elf,TB>\\; run -a\\; exit\\;' >vsim.log"
     COMMAND tail -n +1 -- ./stdout/*
     WORKING_DIRECTORY ./${SUBDIR}
     DEPENDS ${NAME}.slm.cmd ${NAME}.stim.txt ${NAME}.links
