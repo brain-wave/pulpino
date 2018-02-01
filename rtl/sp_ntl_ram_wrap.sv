@@ -10,7 +10,7 @@
 
 `include "config.sv"
 
-module sp_ram_wrap
+module sp_ntl_ram_wrap
   #(
     parameter RAM_SIZE   = 32768,              // in bytes
     parameter ADDR_WIDTH = $clog2(RAM_SIZE),
@@ -41,33 +41,6 @@ module sp_ram_wrap
     .douta  ( rdata_o                ),
     .wea    ( be_i & {4{we_i}}       )
   );
-
-  // TODO: we should kill synthesis when the ram size is larger than what we have here
-  // TODO: add different memories
-
-`elsif ASIC
-   // RAM bypass logic
-   logic [31:0] ram_out_int;
-   // assign rdata_o = (bypass_en_i) ? wdata_i : ram_out_int;
-   assign rdata_o = ram_out_int;
-
-   sp_ram_bank
-   #(
-    .NUM_BANKS  ( RAM_SIZE/4096 ),
-    .BANK_SIZE  ( 1024          )
-   )
-   sp_ram_bank_i
-   (
-    .clk_i   ( clk                     ),
-    .rstn_i  ( rstn_i                  ),
-    .en_i    ( en_i                    ),
-    .addr_i  ( addr_i                  ),
-    .wdata_i ( wdata_i                 ),
-    .rdata_o ( ram_out_int             ),
-    .we_i    ( (we_i & ~bypass_en_i)   ),
-    .be_i    ( be_i                    )
-   );
-
 `else
   sp_ram
   #(
@@ -87,5 +60,4 @@ module sp_ram_wrap
     .be_i    ( be_i      )
   );
 `endif
-
 endmodule

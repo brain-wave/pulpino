@@ -383,7 +383,11 @@ module tb;
 
   // TODO: this is a hack, do it properly!
   `include "tb_spi_pkg.sv"
-  `include "tb_mem_pkg.sv"
+  `ifdef SYNTHESIS
+   `include "tb_ntl_mem_pkg.sv"
+  `else
+   `include "tb_mem_pkg.sv"
+  `endif
   `include "spi_debug_test.svh"
   `include "mem_dpi.svh"
 
