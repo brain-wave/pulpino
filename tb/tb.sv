@@ -83,7 +83,8 @@ module tb;
   uart_bus
   #(
     .BAUD_RATE(BAUDRATE),
-    .PARITY_EN(0)
+    .PARITY_EN(0),
+    .CLK_PERIOD(`CLK_PERIOD)
   )
   uart
   (
@@ -383,7 +384,11 @@ module tb;
 
   // TODO: this is a hack, do it properly!
   `include "tb_spi_pkg.sv"
+<<<<<<< HEAD
   `ifdef SYNTHESIS
+=======
+  `ifdef ASIC
+>>>>>>> 4fb24bbd22b84a43e4f63e9d338f63ca88df4434
    `include "tb_ntl_mem_pkg.sv"
   `else
    `include "tb_mem_pkg.sv"

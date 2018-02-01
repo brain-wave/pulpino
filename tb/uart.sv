@@ -14,7 +14,8 @@
 interface uart_bus
   #(
     parameter BAUD_RATE = 115200,
-    parameter PARITY_EN = 0
+    parameter PARITY_EN = 0,
+    parameter CLK_PERIOD = 40
     )
   (
     input  logic rx,
@@ -25,7 +26,7 @@ interface uart_bus
   timeunit      1ps;
   timeprecision 1ps;
 
-  localparam BIT_PERIOD = (1000000000/BAUD_RATE*1000);
+  localparam BIT_PERIOD = (1000000000/BAUD_RATE*1000/40*CLK_PERIOD);
 
   logic [7:0]       character;
   logic [256*8-1:0] stringa;
@@ -36,7 +37,7 @@ interface uart_bus
   initial
   begin
     tx   = 1'b1;
-    file = $fopen("stdout/uart", "w");
+    file = $fopen("uart.out", "w");
   end
 
   always
