@@ -183,7 +183,11 @@ module tb;
     .gpio_in           ( gpio_in      ),
     .gpio_out          ( gpio_out     ),
     .gpio_dir          ( gpio_dir     ),
+<<<<<<< HEAD
     //.gpio_padcfg       (              ), // throws error in synthesis: signal [31:0][5:0]gpio_padcfg; => not verilog
+=======
+//    .gpio_padcfg       (              ),
+>>>>>>> 4fb24bbd22b84a43e4f63e9d338f63ca88df4434
 
     .tck_i             ( jtag_if.tck     ),
     .trstn_i           ( jtag_if.trstn   ),
@@ -385,7 +389,11 @@ module tb;
   // TODO: this is a hack, do it properly!
   `include "tb_spi_pkg.sv"
 <<<<<<< HEAD
+<<<<<<< HEAD
   `ifdef SYNTHESIS
+=======
+  `ifdef ASIC
+>>>>>>> 4fb24bbd22b84a43e4f63e9d338f63ca88df4434
 =======
   `ifdef ASIC
 >>>>>>> 4fb24bbd22b84a43e4f63e9d338f63ca88df4434
