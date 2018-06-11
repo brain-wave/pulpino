@@ -41,26 +41,50 @@ module sp_ram_wrap
     .douta  ( rdata_o                ),
     .wea    ( be_i & {4{we_i}}       )
   );
-  // TODO: we should kill synthesis when the ram size is larger than what we have here
-  // TODO: add different memories
-`elsif ASIC
-  sp_ram
-  #(
-    .ADDR_WIDTH ( ADDR_WIDTH ),
-    .DATA_WIDTH ( DATA_WIDTH ),
-    .NUM_WORDS  ( RAM_SIZE   )
-  )
-  sp_ram_i
-  (
-    .clk     ( clk       ),
-
-    .en_i    ( en_i      ),
-    .addr_i  ( addr_i    ),
-    .wdata_i ( wdata_i   ),
-    .rdata_o ( rdata_o   ),
-    .we_i    ( we_i      ),
-    .be_i    ( be_i      )
-  );
+`elsif TSMC40
+    parameter TSMC_ADDR_WIDTH = 13; // 8K words (word-addressing)
+    
+    wire wPD = 1'b0; // Power down (0 for Power up)
+    wire wCLK = clk;
+    wire [DATA_WIDTH-1:0] wQ;
+    
+    wire wWEB = !we_i; // Read/Write (1 for read)
+    wire wCEB = !en_i; // Chip Enable (0 for enable)
+    wire [DATA_WIDTH-1:0] wBWEB;
+    wire [TSMC_ADDR_WIDTH-1:0] wA = addr_i[ADDR_WIDTH-1:2]; // Convert to word-addressing
+    wire [DATA_WIDTH-1:0] wD = wdata_i; 
+    
+    // broadcast byte enable bits to bits
+    genvar i;
+    generate for(i = 0; i < DATA_WIDTH/8; i++)
+        begin
+            assign wBWEB[(i+1)*8-1:i*8] = {8{!be_i[i]}}; // Bit enable (0 for enable)
+        end
+    endgenerate
+    
+    //"/home/mwijtvliet/git/memories/ts1n40lpb8192x32m16m_210a/VERILOG/ts1n40lpb8192x32m16m_210a_ss0p99v125c.v"    
+    TS1N40LPB8192X32M16M sp_ram_i
+    (
+        .A(wA),
+        .D(wD),
+        .BWEB(wBWEB),
+        .WEB(wWEB),
+        .CEB(wCEB), // chip enable connected correctly?
+        .CLK(wCLK),
+        .PD(wPD),
+        .AWT(1'b0), // asynchronous write through (0 for disable)
+        .AM(wA),
+        .DM(wD),
+        .BWEBM(wBWEB),
+        .WEBM(wWEB),
+        .CEBM(wCEB),
+        .RTSEL(2'b01), // recommended Read cycle timing setting
+        .WTSEL(2'b01), // recommended Write cycle timing setting
+        .BIST(1'b0),   // Normal mode
+        .Q(wQ)
+    );
+    
+    assign rdata_o = wQ;
 `else
   sp_ram
   #(

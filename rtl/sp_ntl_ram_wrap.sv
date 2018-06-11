@@ -8,6 +8,7 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
+/* 
 `include "config.sv"
 
 module sp_ntl_ram_wrap
@@ -61,3 +62,4 @@ module sp_ntl_ram_wrap
   );
 `endif
 endmodule
+*/

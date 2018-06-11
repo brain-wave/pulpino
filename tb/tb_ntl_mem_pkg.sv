@@ -25,13 +25,19 @@
     string       l2_dmem_file;
     begin
       $display("Preloading memory");
-
-      instr_size   = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.RAM_SIZE;
-      instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.DATA_WIDTH;
-
-      data_size   = tb.top_i.core_region_i.data_mem.RAM_SIZE;
-      data_width = tb.top_i.core_region_i.data_mem.DATA_WIDTH;
-
+`ifdef TSMC40
+      instr_width = tb.top_i.core_region_i.instr_mem_sp_ram_wrap_i_sp_ram_i.numBit;
+      instr_size  = tb.top_i.core_region_i.instr_mem_sp_ram_wrap_i_sp_ram_i.numWord * instr_width/4;
+      
+      data_width = tb.top_i.core_region_i.data_mem_sp_ram_i.numBit;
+      data_size  = tb.top_i.core_region_i.data_mem_sp_ram_i.numWord * data_width/4;
+`else
+      instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.numBit;
+      instr_size   = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.numWord * instr_width/4;
+      
+      data_width = tb.top_i.core_region_i.data_mem.sp_ram_i.numBit;
+      data_size   = tb.top_i.core_region_i.data_mem.sp_ram_i.numWord * data_width/4;
+`endif
       instr_mem = new [instr_size/4];
       data_mem  = new [data_size/4];
 
@@ -47,7 +53,17 @@
       $display("Preloading data memory from %0s", l2_dmem_file);
       $readmemh(l2_dmem_file, data_mem);
 
+`ifdef TSMC40
+      // preload data memory
+      for (addr = 0; addr < data_size/4; addr = addr + 1) begin
+          tb.top_i.core_region_i.data_mem_sp_ram_i.MEMORY[addr/16][addr%16] = data_mem[addr];
+      end
 
+      // preload instruction memory
+      for (addr = 0; addr < data_size/4; addr = addr + 1) begin
+          tb.top_i.core_region_i.instr_mem_sp_ram_wrap_i_sp_ram_i.MEMORY[addr/16][addr%16] = instr_mem[addr];
+      end
+`else
       // preload data memory
       for(addr = 0; addr < data_size/4; addr = addr) begin
 
@@ -87,5 +103,6 @@
           if (bidx%4 == 3) addr++;
         end
       end
+`endif
     end
   endtask

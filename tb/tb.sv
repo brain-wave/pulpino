@@ -83,8 +83,7 @@ module tb;
   uart_bus
   #(
     .BAUD_RATE(BAUDRATE),
-    .PARITY_EN(0),
-    .CLK_PERIOD(`CLK_PERIOD)
+    .PARITY_EN(0)
   )
   uart
   (
@@ -183,11 +182,7 @@ module tb;
     .gpio_in           ( gpio_in      ),
     .gpio_out          ( gpio_out     ),
     .gpio_dir          ( gpio_dir     ),
-<<<<<<< HEAD
     //.gpio_padcfg       (              ), // throws error in synthesis: signal [31:0][5:0]gpio_padcfg; => not verilog
-=======
-//    .gpio_padcfg       (              ),
->>>>>>> 4fb24bbd22b84a43e4f63e9d338f63ca88df4434
 
     .tck_i             ( jtag_if.tck     ),
     .trstn_i           ( jtag_if.trstn   ),
@@ -220,35 +215,43 @@ module tb;
   begin
     int i;
 
+`ifdef SYNTHESIS
+    $sdf_annotate("../../syn/pulpino_top.sdf",top_i,"sdf.cfg",,"MAXIMUM"); 
+    //$sdf_annotate("../../syn/pulpino_top.1.sdf",top_i,,,"MAXIMUM"); 
+`endif
+    
     if(!$value$plusargs("MEMLOAD=%s", memload))
       memload = "PRELOAD";
 
-    $display("Using MEMLOAD method: %s", memload);
-
     $display("Using %s core", USE_ZERO_RISCY ? "zero-riscy" : "ri5cy");
-
+    
     use_qspi = SPI == "QUAD" ? 1'b1 : 1'b0;
 
     s_rst_n      = 1'b0;
     fetch_enable = 1'b0;
-
+    
     #500ns;
-
-    s_rst_n = 1'b1;
+    s_rst_n = 1'b1; // TODO: posedge to negative clockedge
 
     #500ns;
     if (use_qspi)
       spi_enable_qpi();
 
-
+    $display("Using MEMLOAD method: %s", memload);
     if (memload != "STANDALONE")
     begin
       /* Configure JTAG and set boot address */
+      $display("1");
       adv_dbg_if.jtag_reset();
+      $display("2");
       adv_dbg_if.jtag_softreset();
+      $display("3");
       adv_dbg_if.init();
+      $display("4");
       adv_dbg_if.axi4_write32(32'h1A10_7008, 1, 32'h0000_0000);
+      $display("5");
     end
+    //$display("Using MEMLOAD method: %s", memload);
 
     if (memload == "PRELOAD")
     begin
@@ -377,26 +380,20 @@ module tb;
 
 
     // end of computation
+    $display("6");
     if (~gpio_out[8])
       wait(gpio_out[8]);
-
+    $display("7");
+    
     spi_check_return_codes(exit_status);
-
+    $display("8");
     $fflush();
     $stop();
   end
 
   // TODO: this is a hack, do it properly!
   `include "tb_spi_pkg.sv"
-<<<<<<< HEAD
-<<<<<<< HEAD
   `ifdef SYNTHESIS
-=======
-  `ifdef ASIC
->>>>>>> 4fb24bbd22b84a43e4f63e9d338f63ca88df4434
-=======
-  `ifdef ASIC
->>>>>>> 4fb24bbd22b84a43e4f63e9d338f63ca88df4434
    `include "tb_ntl_mem_pkg.sv"
   `else
    `include "tb_mem_pkg.sv"

@@ -24,9 +24,9 @@ class Section:
         else:
             return False;
 
-f = open('trace_core_00.log', 'r')
+f = open('trace_core_00_0.log', 'r')
 a = open(sys.argv[1], 'r')
-r = open('trace_core_00_annotated.log', 'w')
+r = open('trace_core_00_0_annotated.log', 'w')
 
 
 save = []

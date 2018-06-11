@@ -162,7 +162,8 @@ class JTAG_reg #(int unsigned size = 32);
    endtask
 
    local task jtag_wait_halfperiod(input int cycles);
-      #(50000*cycles);
+      //#(50000*cycles); // original; makes ntlsim take very long
+      #(5*cycles);
    endtask
 
 endclass
