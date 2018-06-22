@@ -60,6 +60,12 @@ module clk_rst_gen
   assign fll_r_data_o = 1'b0;
   assign fll_lock_o   = 1'b0;
   assign scan_o       = 1'b0;
+`elsif FDSOI28
+  // TODO: insert FLL for FDSOI28
+  assign fll_ack_o    = fll_req_i;
+  assign fll_r_data_o = 1'b0;
+  assign fll_lock_o   = 1'b0;
+  assign scan_o       = 1'b0;
 `else
   umcL65_LL_FLL
   fll_i

@@ -85,6 +85,25 @@ module sp_ram_wrap
     );
     
     assign rdata_o = wQ;
+`elsif FDSOI28
+  // Needs to be replaced by STM memory
+  sp_ram
+  #(
+    .ADDR_WIDTH ( ADDR_WIDTH ),
+    .DATA_WIDTH ( DATA_WIDTH ),
+    .NUM_WORDS  ( RAM_SIZE   )
+  )
+  sp_ram_i
+  (
+    .clk     ( clk       ),
+
+    .en_i    ( en_i      ),
+    .addr_i  ( addr_i    ),
+    .wdata_i ( wdata_i   ),
+    .rdata_o ( rdata_o   ),
+    .we_i    ( we_i      ),
+    .be_i    ( be_i      )
+  );
 `else
   sp_ram
   #(
