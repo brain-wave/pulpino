@@ -247,6 +247,7 @@ void check_motion_detection_dotp(testresult_t *result, void (*start)(), void (*s
   init_motion_detection();
   printf("Starting Motion Detection Application with dotp \n");
 
+#if 0
 #ifdef PROFILE
   perf_reset();
   perf_enable_id(EVENT_ID);
@@ -258,6 +259,46 @@ void check_motion_detection_dotp(testresult_t *result, void (*start)(), void (*s
   perf_stop();
   printf("Perf: %s: %d\n", SPR_PCER_NAME(EVENT_ID),  cpu_perf_get(EVENT_ID));
 #endif
+#else
+  printf("Test \n");
+  // count cycles
+  perf_reset();
+  perf_enable_id(0);
+  start();
+  motion_detection(1);
+  stop();
+  perf_stop();
+  printf("Perf: %s: %d\n", SPR_PCER_NAME(0),  cpu_perf_get(0));
+
+  // count instructions
+  perf_reset();
+  perf_enable_id(1);
+  start();
+  motion_detection(1);
+  stop();
+  perf_stop();
+  printf("Perf: %s: %d\n", SPR_PCER_NAME(1),  cpu_perf_get(1));
+  
+  // count loads
+  perf_reset();
+  perf_enable_id(7);
+  start();
+  motion_detection(1);
+  stop();
+  perf_stop();
+  printf("Perf: %s: %d\n", SPR_PCER_NAME(7),  cpu_perf_get(7));
+  
+  // count stores
+  perf_reset();
+  perf_enable_id(8);
+  start();
+  motion_detection(1);
+  stop();
+  perf_stop();
+  printf("Perf: %s: %d\n", SPR_PCER_NAME(8),  cpu_perf_get(8));
+#endif
+
+
   result->errors = check_image((pixel*) image_test, (pixel*) Y_golden);
   uart_wait_tx_done();
 }

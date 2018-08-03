@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 
 # Copyright 2017 ETH Zurich and University of Bologna.
 # Copyright and related rights are licensed under the Solderpad Hardware
@@ -104,7 +104,7 @@ def bytes_to_words(byte_dict, word_dict):
 # Start of file
 ###############################################################################
 if(len(sys.argv) < 2):
-    print "Usage s19toslm.py FILENAME"
+    print("Usage s19toslm.py FILENAME")
     quit()
 
 
