@@ -1,0 +1,2 @@
+add_subdirectory(test_convolution)
+add_subdirectory(test_bw0_int)
