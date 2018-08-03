@@ -25,7 +25,8 @@ def find_server():
 
     stdout = stdout.split('\n')
     for line in stdout:
-        if "origin" in line:
+        # Our default remote is 'upstream'
+        if "upstream" in line:
             tmp = line.split(' ')
             tmp = tmp[0].split('\t')
 
