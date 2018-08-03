@@ -90,7 +90,7 @@ macro(add_sim_targets NAME)
     COMMAND ${CMAKE_COMMAND} -E remove stdout/*
     COMMAND ${CMAKE_COMMAND} -E remove FS/*
     COMMAND tcsh -c "${SETENV} ${VSIM} -novopt -c -64 -do 'source tcl_files/$<TARGET_PROPERTY:${NAME}.elf,TB>\\; run -a\\; exit\\;' >vsim.log"
-    COMMAND tail -n +1 -- ./stdout/*
+    COMMAND cat uart.out
     WORKING_DIRECTORY ./${SUBDIR}
     DEPENDS ${NAME}.slm.cmd ${NAME}.stim.txt ${NAME}.links
     COMMENT "Running ${NAME} in ModelSim")
