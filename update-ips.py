@@ -6,6 +6,7 @@
 
 import sys,os,subprocess,re
 
+brainwave_remote = "https://github.com/brain-wave"
 devnull = open(os.devnull, 'wb')
 
 def execute(cmd, silent=False):
@@ -21,11 +22,12 @@ def execute_out(cmd, silent=False):
     return out
 
 def find_server():
+    # Our default remote is 'upstream'
+    stdout = execute_out("git remote add upstream " + brainwave_remote)
     stdout = execute_out("git remote -v")
 
     stdout = stdout.split('\n')
     for line in stdout:
-        # Our default remote is 'upstream'
         if "upstream" in line:
             tmp = line.split(' ')
             tmp = tmp[0].split('\t')
@@ -78,10 +80,10 @@ if os.path.exists("ipstools") and os.path.isdir("ipstools"):
 else:
     # try to find the ipstools repository
     if "http" in remote:
-        if execute("git clone %s/IPApproX.git ipstools -b verilator" % (remote)) != 0:
+        if execute("git clone %s/IPApproX.git ipstools -b verilator" % (brainwave_remote)) != 0:
             execute("git clone %s/pulp-tools/IPApproX.git ipstools -b verilator" % (server))
     else:
-        if execute("git clone %s/IPApproX.git ipstools -b verilator" % (remote)) != 0:
+        if execute("git clone %s/IPApproX.git ipstools -b verilator" % (brainwave_remote)) != 0:
             execute("git clone %s:pulp-tools/IPApproX.git ipstools -b verilator" % (server))
 
     import ipstools
