@@ -20,6 +20,7 @@
 
 # APB IPs
 apb/apb_node:
+  remote: https://github.com/brain-wave
   commit: pulpinov1
 apb/apb_event_unit:
   commit: pulpinov1
@@ -36,6 +37,7 @@ apb/apb_spi_master:
 apb/apb_timer:
   commit: pulpinov1
 apb/apb_uart:
+  remote: https://github.com/brain-wave
   commit: pulpinov1
 apb/apb_uart_sv:
   commit: pulpinov1
@@ -49,6 +51,7 @@ axi/axi2apb:
 axi/axi_mem_if_DP:
   commit: pulpinov1
 axi/axi_node:
+  remote: https://github.com/brain-wave
   commit: pulpinov1
 axi/axi_slice:
   commit: pulpinov1
@@ -59,12 +62,14 @@ axi/axi_spi_master:
 axi/axi_spi_slave:
   commit: pulpinov1
 axi/core2axi:
+  remote: https://github.com/brain-wave
   commit: pulpinov1
 
 adv_dbg_if:
   commit: pulpinov1
 
 riscv:
+  remote: https://github.com/brain-wave
   commit: pulpinov1
 
 zero-riscy:
