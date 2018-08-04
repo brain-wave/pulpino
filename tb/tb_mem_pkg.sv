@@ -57,6 +57,16 @@
       for (addr = 0; addr < data_size/4; addr = addr + 1) begin
           tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.MEMORY[addr/16][addr%16] = instr_mem[addr];
       end
+`elsif FDSOI28
+      // preload data memory
+      for (addr = 0; addr < data_size/4; addr = addr + 1) begin
+          tb.top_i.core_region_i.data_mem.sp_ram_i.Mem[addr] = data_mem[addr];
+      end
+
+      // preload instruction memory
+      for (addr = 0; addr < data_size/4; addr = addr + 1) begin
+          tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.Mem[addr] = instr_mem[addr];
+      end
 `else
       // preload data memory
       for(addr = 0; addr < data_size/4; addr = addr) begin

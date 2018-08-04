@@ -86,24 +86,67 @@ module sp_ram_wrap
     
     assign rdata_o = wQ;
 `elsif FDSOI28
-  // Needs to be replaced by STM memory
-  sp_ram
-  #(
-    .ADDR_WIDTH ( ADDR_WIDTH ),
-    .DATA_WIDTH ( DATA_WIDTH ),
-    .NUM_WORDS  ( RAM_SIZE   )
-  )
-  sp_ram_i
-  (
-    .clk     ( clk       ),
-
-    .en_i    ( en_i      ),
-    .addr_i  ( addr_i    ),
-    .wdata_i ( wdata_i   ),
-    .rdata_o ( rdata_o   ),
-    .we_i    ( we_i      ),
-    .be_i    ( be_i      )
+    parameter FDSOI28_ADDR_WIDTH = 13; // 8K words (word-addressing)
+    
+    wire wCK = clk;
+    wire [DATA_WIDTH-1:0] wQ;
+    
+    wire wWEN = !we_i; // Read/Write (1 for read)
+    wire wCSN = !en_i; // Chip Enable (0 for enable)
+    wire [DATA_WIDTH-1:0] wM;
+    wire [FDSOI28_ADDR_WIDTH-1:0] wA = addr_i[ADDR_WIDTH-1:2]; // Convert to word-addressing
+    wire [DATA_WIDTH-1:0] wD = wdata_i; 
+    
+    // broadcast byte enable bits to bits
+    genvar i;
+    generate for(i = 0; i < DATA_WIDTH/8; i++)
+        begin
+            assign wM[(i+1)*8-1:i*8] = {8{!be_i[i]}}; // Bit enable (0 for enable)
+        end
+    endgenerate
+  
+  //"/eda/Technology/cmos28fdsoi_29/C28SOI_SPHD_BB_A_180612/4.5-00.00/behaviour/verilog/SPHD_BB_A_180612.v"
+  ST_SPHD_BB_8192x32m16_baTdl sp_ram_i(
+    .CK(wCK),
+    .WEN(wWEN),
+    .D(wD),
+    .A(wA), 
+    .Q(wQ),
+    .M(wM),
+    
+    // Power-saving pins
+    .CSN(wCSN),         // Chip Select (pull high to gate memory clock)
+    .IG(1'b0),          // Input gating pin (gates memory clock as well)
+    .STDBY(1'b0),       // Standby mode enable pin 
+    .SLEEP(1'b0),       // Power-down enable pin
+    .PSWSMALLMA(1'b0),  // Small embedded switch control for array
+    .PSWSMALLMP(1'b0),  // Small embedded switch control for periphery
+    .PSWLARGEMA(1'b0),  // Large embedded switch control for array
+    .PSWLARGEMP(1'b0),  // Large embedded switch control for periphery
+    
+    // Design For Test (DFT) related pins
+    .TBYPASS(1'b0),     // Memory bypass for test mode 
+    .ATP(1'b0),         // Enable DFT features (enable=1)
+    .TBIST(1'b0),       // BIST mode enable
+    .TCSN(1'b0),        // BIST chip select
+    .TWEN(1'b0),        // BIST write enable
+    .TA({FDSOI28_ADDR_WIDTH{1'b0}}), // BIST address
+    .TED(1'b0),         // BIST input for even bits (1-bit wide)
+    .TEM(1'b0),         // BIST mask for even bits  (1-bit wide)
+    .TOD(1'b0),         // BIST input for odd bits  (1-bit wide)
+    .TOM(1'b0),         // BIST mask for odd bits   (1-bit wide)
+    .SE(1'b0),          // Scan enable for memory scan chain  
+    .SCTRLI(1'b0),
+    .SDLI(1'b0),
+    .SDRI(1'b0),
+    .SMLI(1'b0),
+    .SMRI(1'b0),
+    
+     // Debugging pins
+    .INITN(1'b1)      // Reset memory FSM    
   );
+  
+  assign rdata_o = wQ;
 `else
   sp_ram
   #(
