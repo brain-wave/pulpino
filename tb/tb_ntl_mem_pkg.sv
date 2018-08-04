@@ -25,19 +25,19 @@
     string       l2_dmem_file;
     begin
       $display("Preloading memory");
-//`ifdef TSMC40
-//      instr_width = tb.top_i.core_region_i.instr_mem_sp_ram_wrap_i_sp_ram_i.numBit;
-//      instr_size  = tb.top_i.core_region_i.instr_mem_sp_ram_wrap_i_sp_ram_i.numWord * instr_width/4;
-//      
-//      data_width = tb.top_i.core_region_i.data_mem_sp_ram_i.numBit;
-//      data_size  = tb.top_i.core_region_i.data_mem_sp_ram_i.numWord * data_width/4;
-//`else
+`ifdef FDSOI28
+      instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.bits;
+      instr_size   = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.words * instr_width/4;
+      
+      data_width = tb.top_i.core_region_i.data_mem.sp_ram_i.bits;
+      data_size   = tb.top_i.core_region_i.data_mem.sp_ram_i.words * data_width/4;
+`else
       instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.numBit;
       instr_size   = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.numWord * instr_width/4;
       
       data_width = tb.top_i.core_region_i.data_mem.sp_ram_i.numBit;
       data_size   = tb.top_i.core_region_i.data_mem.sp_ram_i.numWord * data_width/4;
-//`endif
+`endif
       instr_mem = new [instr_size/4];
       data_mem  = new [data_size/4];
 
@@ -56,14 +56,22 @@
 `ifdef TSMC40
       // preload data memory
       for (addr = 0; addr < data_size/4; addr = addr + 1) begin
-          //tb.top_i.core_region_i.data_mem_sp_ram_i.MEMORY[addr/16][addr%16] = data_mem[addr];
           tb.top_i.core_region_i.data_mem.sp_ram_i.MEMORY[addr/16][addr%16] = data_mem[addr];
       end
 
       // preload instruction memory
       for (addr = 0; addr < data_size/4; addr = addr + 1) begin
-          //tb.top_i.core_region_i.instr_mem_sp_ram_wrap_i_sp_ram_i.MEMORY[addr/16][addr%16] = instr_mem[addr];
           tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.MEMORY[addr/16][addr%16] = instr_mem[addr];
+      end
+`elsif FDSOI28
+      // preload data memory
+      for (addr = 0; addr < data_size/4; addr = addr + 1) begin
+          tb.top_i.core_region_i.data_mem.sp_ram_i.Mem[addr] = data_mem[addr];
+      end
+
+      // preload instruction memory
+      for (addr = 0; addr < data_size/4; addr = addr + 1) begin
+          tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.Mem[addr] = instr_mem[addr];
       end
 `else
       // preload data memory
