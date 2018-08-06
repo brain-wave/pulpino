@@ -20,60 +20,72 @@
 
 # APB IPs
 apb/apb_node:
-  remote: https://github.com/brain-wave
   commit: pulpinov1
 apb/apb_event_unit:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 apb/apb_fll_if:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 apb/apb_gpio:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 apb/apb_i2c:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 apb/apb_pulpino:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 apb/apb_spi_master:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 apb/apb_timer:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 apb/apb_uart:
-  remote: https://github.com/brain-wave
   commit: pulpinov1
 apb/apb_uart_sv:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 apb/apb2per:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 
 
 # AXI IPs
 axi/axi2apb:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 axi/axi_mem_if_DP:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 axi/axi_node:
-  remote: https://github.com/brain-wave
   commit: pulpinov1
 axi/axi_slice:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 axi/axi_slice_dc:
   commit: pulpinov1
 axi/axi_spi_master:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 axi/axi_spi_slave:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 axi/core2axi:
-  remote: https://github.com/brain-wave
   commit: pulpinov1
 
 adv_dbg_if:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 
 riscv:
-  remote: https://github.com/brain-wave
   commit: pulpinov1
 
 zero-riscy:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
 
 fpu:
+  remote: https://github.com/pulp-platform
   commit: pulpinov1
