@@ -163,7 +163,7 @@ class JTAG_reg #(int unsigned size = 32);
 
    local task jtag_wait_halfperiod(input int cycles);
       //#(50000*cycles); // original; makes ntlsim take very long
-      #(5*cycles);
+      #(100*cycles); // should be a few times slower than system clock!
    endtask
 
 endclass
@@ -434,4 +434,66 @@ class adv_dbg_if_t;
      this.cpu_write(cpu_id, {16'b0, 6'b1, 5'b0, addr}, 1, tmp);
    endtask
 
+   ///*
+   task axi_write_2(input [4:0] write_size, input logic[31:0] addr, input int nwords, input logic [31:0] data[]);
+      logic [255:0] dataout;
+      int bit_size = 32;
+
+      jtag_cluster_dbg.start_shift();
+      jtag_cluster_dbg.shift_nbits(6, `ADV_DBG_AXI4_MODULE, dataout);
+      jtag_cluster_dbg.update_and_goto_shift();
+      jtag_cluster_dbg.shift_nbits(53,{write_size, addr, nwords[15:0]}, dataout);
+      jtag_cluster_dbg.update_and_goto_shift();
+      jtag_cluster_dbg.shift_nbits_noex(bit_size + 1, {data[0], 1'b1}, dataout);
+      for(int i=1; i<nwords; i++)
+         jtag_cluster_dbg.shift_nbits_noex(bit_size, data[i], dataout);
+      jtag_cluster_dbg.shift_nbits(34, {2'b0, 32'h11111111}, dataout); // for now we completely ignore CRC
+      jtag_cluster_dbg.idle();
+      $display("[adv_dbg_if] AXI4 WRITE%d burst @%h for %d bytes.", bit_size, addr, nwords*4);
+   endtask
+   /*
+    //logic [31:0] data_mem[8192-1:0];  // this variable holds the whole memory content
+    //logic [31:0] instr_mem[8192-1:0]; // this variable holds the whole memory content
+   
+    task jtag_load;
+        integer      addr;
+        integer      mem_addr;
+        integer      bidx;
+        integer      instr_size;
+        integer      data_size;
+
+        logic [31:0] data;
+        string       l2_imem_file;
+        string       l2_dmem_file;
+        logic [31:0]     data_mem[];  // this variable holds the whole memory content
+        logic [31:0]     instr_mem[]; // this variable holds the whole memory content
+            
+        begin
+            $display("Preloading memory via JTAG");    
+
+            
+            instr_size = 32768; // bytes
+            data_size = 32768; // bytes
+            
+            instr_mem = new [instr_size/4];
+            data_mem  = new [data_size/4];
+            
+            if(!$value$plusargs("l2_imem=%s", l2_imem_file))
+                l2_imem_file = "slm_files/l2_stim.slm";
+
+            $display("Preloading instruction memory from %0s", l2_imem_file);
+            $readmemh(l2_imem_file, instr_mem);
+
+            if(!$value$plusargs("l2_dmem=%s", l2_dmem_file))
+                l2_dmem_file = "slm_files/tcdm_bank0.slm";
+
+            $display("Preloading data memory from %0s", l2_dmem_file);
+            $readmemh(l2_dmem_file, data_mem);
+            
+
+        end
+    endtask
+    
+   
+   */
 endclass

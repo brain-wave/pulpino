@@ -27,7 +27,25 @@ module sp_ram_wrap
     input  logic [DATA_WIDTH/8-1:0] be_i,
     input  logic                    bypass_en_i
   );
-
+  
+  // signals
+  wire rst = ~rstn_i;
+  wire [ADDR_WIDTH-3:0] wA = rst ? {(ADDR_WIDTH-2){1'b0}} : addr_i[ADDR_WIDTH-1:2]; // Convert to word-addressing
+  wire [DATA_WIDTH-1:0] wD = rst ? {DATA_WIDTH{1'b0}} : wdata_i;
+  wire wCEB = rst ? 1'b1 : !en_i; // Chip Enable (0 for enable)
+  wire wWEB = rst ? 1'b1 : !we_i; // Read/Write (1 for read)
+  wire [(DATA_WIDTH/4)-1:0] wBE = rst ? {(DATA_WIDTH/8){1'b0}} : be_i; // Byte enable (1 for enable)
+  wire [DATA_WIDTH-1:0] wBWEB;
+  wire [DATA_WIDTH-1:0] wQ;
+  
+  // broadcast byte enable bits to bits
+  genvar i;
+  generate for(i = 0; i < DATA_WIDTH/8; i++)
+      begin
+          assign wBWEB[(i+1)*8-1:i*8] = {8{!wBE[i]}}; // Bit enable (0 for enable)
+      end
+  endgenerate
+  
 `ifdef PULP_FPGA_EMUL
   xilinx_mem_8192x32
   sp_ram_i
@@ -42,25 +60,7 @@ module sp_ram_wrap
     .wea    ( be_i & {4{we_i}}       )
   );
 `elsif TSMC40
-    parameter TSMC_ADDR_WIDTH = 13; // 8K words (word-addressing)
-    
     wire wPD = 1'b0; // Power down (0 for Power up)
-    wire wCLK = clk;
-    wire [DATA_WIDTH-1:0] wQ;
-    
-    wire wWEB = !we_i; // Read/Write (1 for read)
-    wire wCEB = !en_i; // Chip Enable (0 for enable)
-    wire [DATA_WIDTH-1:0] wBWEB;
-    wire [TSMC_ADDR_WIDTH-1:0] wA = addr_i[ADDR_WIDTH-1:2]; // Convert to word-addressing
-    wire [DATA_WIDTH-1:0] wD = wdata_i; 
-    
-    // broadcast byte enable bits to bits
-    genvar i;
-    generate for(i = 0; i < DATA_WIDTH/8; i++)
-        begin
-            assign wBWEB[(i+1)*8-1:i*8] = {8{!be_i[i]}}; // Bit enable (0 for enable)
-        end
-    endgenerate
     
     //"/home/mwijtvliet/git/memories/ts1n40lpb8192x32m16m_210a/VERILOG/ts1n40lpb8192x32m16m_210a_ss0p99v125c.v"    
     TS1N40LPB8192X32M16M sp_ram_i
@@ -70,7 +70,7 @@ module sp_ram_wrap
         .BWEB(wBWEB),
         .WEB(wWEB),
         .CEB(wCEB), // chip enable connected correctly?
-        .CLK(wCLK),
+        .CLK(clk),
         .PD(wPD),
         .AWT(1'b0), // asynchronous write through (0 for disable)
         .AM(wA),
@@ -86,36 +86,18 @@ module sp_ram_wrap
     
     assign rdata_o = wQ;
 `elsif FDSOI28
-    parameter FDSOI28_ADDR_WIDTH = 13; // 8K words (word-addressing)
-    
-    wire wCK = clk;
-    wire [DATA_WIDTH-1:0] wQ;
-    
-    wire wWEN = !we_i; // Read/Write (1 for read)
-    wire wCSN = !en_i; // Chip Enable (0 for enable)
-    wire [DATA_WIDTH-1:0] wM;
-    wire [FDSOI28_ADDR_WIDTH-1:0] wA = addr_i[ADDR_WIDTH-1:2]; // Convert to word-addressing
-    wire [DATA_WIDTH-1:0] wD = wdata_i; 
-    
-    // broadcast byte enable bits to bits
-    genvar i;
-    generate for(i = 0; i < DATA_WIDTH/8; i++)
-        begin
-            assign wM[(i+1)*8-1:i*8] = {8{!be_i[i]}}; // Bit enable (0 for enable)
-        end
-    endgenerate
   
   //"/eda/Technology/cmos28fdsoi_29/C28SOI_SPHD_BB_A_180612/4.5-00.00/behaviour/verilog/SPHD_BB_A_180612.v"
   ST_SPHD_BB_8192x32m16_baTdl sp_ram_i(
-    .CK(wCK),
-    .WEN(wWEN),
+    .CK(clk),
+    .WEN(wWEB),
     .D(wD),
     .A(wA), 
     .Q(wQ),
-    .M(wM),
+    .M(wBWEB),
     
     // Power-saving pins
-    .CSN(wCSN),         // Chip Select (pull high to gate memory clock)
+    .CSN(wCEB),         // Chip Select (pull high to gate memory clock)
     .IG(1'b0),          // Input gating pin (gates memory clock as well)
     .STDBY(1'b0),       // Standby mode enable pin 
     .SLEEP(1'b0),       // Power-down enable pin
