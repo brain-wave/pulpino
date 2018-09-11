@@ -31,8 +31,9 @@ module peripherals
 
     DEBUG_BUS.Master debug,
 
-    input  logic             spi_clk_i,
     input  logic             testmode_i,
+    /*
+    input  logic             spi_clk_i,
     input  logic             spi_cs_i,
     output logic [1:0]       spi_mode_o,
     output logic             spi_sdo0_o,
@@ -43,6 +44,7 @@ module peripherals
     input  logic             spi_sdi1_i,
     input  logic             spi_sdi2_i,
     input  logic             spi_sdi3_i,
+    */
 
     AXI_BUS.Slave  slave,
 
@@ -146,7 +148,7 @@ module peripherals
   /// SPI Slave, AXI Master                                      ///
   ///                                                            ///
   //////////////////////////////////////////////////////////////////
-
+/*
   axi_spi_slave_wrap
   #(
     .AXI_ADDRESS_WIDTH  ( AXI_ADDR_WIDTH       ),
@@ -175,6 +177,7 @@ module peripherals
     .spi_sdi2   ( spi_sdi2_i     ),
     .spi_sdi3   ( spi_sdi3_i     )
   );
+*/
 
   //////////////////////////////////////////////////////////////////
   ///                                                            ///

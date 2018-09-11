@@ -88,45 +88,91 @@ module sp_ram_wrap
 `elsif FDSOI28
   
   //"/eda/Technology/cmos28fdsoi_29/C28SOI_SPHD_BB_A_180612/4.5-00.00/behaviour/verilog/SPHD_BB_A_180612.v"
-  ST_SPHD_BB_8192x32m16_baTdl sp_ram_i(
-    .CK(clk),
-    .WEN(wWEB),
-    .D(wD),
-    .A(wA), 
-    .Q(wQ),
-    .M(wBWEB),
-    
-    // Power-saving pins
-    .CSN(wCEB),         // Chip Select (pull high to gate memory clock)
-    .IG(1'b0),          // Input gating pin (gates memory clock as well)
-    .STDBY(1'b0),       // Standby mode enable pin 
-    .SLEEP(1'b0),       // Power-down enable pin
-    .PSWSMALLMA(1'b0),  // Small embedded switch control for array
-    .PSWSMALLMP(1'b0),  // Small embedded switch control for periphery
-    .PSWLARGEMA(1'b0),  // Large embedded switch control for array
-    .PSWLARGEMP(1'b0),  // Large embedded switch control for periphery
-    
-    // Design For Test (DFT) related pins
-    .TBYPASS(1'b0),     // Memory bypass for test mode 
-    .ATP(1'b0),         // Enable DFT features (enable=1)
-    .TBIST(1'b0),       // BIST mode enable
-    .TCSN(1'b0),        // BIST chip select
-    .TWEN(1'b0),        // BIST write enable
-    .TA({FDSOI28_ADDR_WIDTH{1'b0}}), // BIST address
-    .TED(1'b0),         // BIST input for even bits (1-bit wide)
-    .TEM(1'b0),         // BIST mask for even bits  (1-bit wide)
-    .TOD(1'b0),         // BIST input for odd bits  (1-bit wide)
-    .TOM(1'b0),         // BIST mask for odd bits   (1-bit wide)
-    .SE(1'b0),          // Scan enable for memory scan chain  
-    .SCTRLI(1'b0),
-    .SDLI(1'b0),
-    .SDRI(1'b0),
-    .SMLI(1'b0),
-    .SMRI(1'b0),
-    
-     // Debugging pins
-    .INITN(1'b1)      // Reset memory FSM    
-  );
+  generate
+    if (RAM_SIZE == 32768)
+      begin : genmem	
+        ST_SPHD_BB_8192x32m16_baTdl sp_ram_i(
+            .CK(clk),
+            .WEN(wWEB),
+            .D(wD),
+            .A(wA), 
+            .Q(wQ),
+            .M(wBWEB),
+            
+            // Power-saving pins
+            .CSN(wCEB),         // Chip Select (pull high to gate memory clock)
+            .IG(1'b0),          // Input gating pin (gates memory clock as well)
+            .STDBY(1'b0),       // Standby mode enable pin 
+            .SLEEP(1'b0),       // Power-down enable pin
+            .PSWSMALLMA(1'b0),  // Small embedded switch control for array
+            .PSWSMALLMP(1'b0),  // Small embedded switch control for periphery
+            .PSWLARGEMA(1'b0),  // Large embedded switch control for array
+            .PSWLARGEMP(1'b0),  // Large embedded switch control for periphery
+            
+            // Design For Test (DFT) related pins
+            .TBYPASS(1'b0),     // Memory bypass for test mode 
+            .ATP(1'b0),         // Enable DFT features (enable=1)
+            .TBIST(1'b0),       // BIST mode enable
+            .TCSN(1'b0),        // BIST chip select
+            .TWEN(1'b0),        // BIST write enable
+            .TA({ADDR_WIDTH-2{1'b0}}), // BIST address
+            .TED(1'b0),         // BIST input for even bits (1-bit wide)
+            .TEM(1'b0),         // BIST mask for even bits  (1-bit wide)
+            .TOD(1'b0),         // BIST input for odd bits  (1-bit wide)
+            .TOM(1'b0),         // BIST mask for odd bits   (1-bit wide)
+            .SE(1'b0),          // Scan enable for memory scan chain  
+            .SCTRLI(1'b0),
+            .SDLI(1'b0),
+            .SDRI(1'b0),
+            .SMLI(1'b0),
+            .SMRI(1'b0),
+            
+            // Debugging pins
+            .INITN(1'b1)      // Reset memory FSM    
+        );
+      end
+    else begin : genmem
+        ST_SPHD_BB_4096x32m8_baTdl sp_ram_i(
+            .CK(clk),
+            .WEN(wWEB),
+            .D(wD),
+            .A(wA), 
+            .Q(wQ),
+            .M(wBWEB),
+            
+            // Power-saving pins
+            .CSN(wCEB),         // Chip Select (pull high to gate memory clock)
+            .IG(1'b0),          // Input gating pin (gates memory clock as well)
+            .STDBY(1'b0),       // Standby mode enable pin 
+            .SLEEP(1'b0),       // Power-down enable pin
+            .PSWSMALLMA(1'b0),  // Small embedded switch control for array
+            .PSWSMALLMP(1'b0),  // Small embedded switch control for periphery
+            .PSWLARGEMA(1'b0),  // Large embedded switch control for array
+            .PSWLARGEMP(1'b0),  // Large embedded switch control for periphery
+            
+            // Design For Test (DFT) related pins
+            .TBYPASS(1'b0),     // Memory bypass for test mode 
+            .ATP(1'b0),         // Enable DFT features (enable=1)
+            .TBIST(1'b0),       // BIST mode enable
+            .TCSN(1'b0),        // BIST chip select
+            .TWEN(1'b0),        // BIST write enable
+            .TA({ADDR_WIDTH-2{1'b0}}), // BIST address
+            .TED(1'b0),         // BIST input for even bits (1-bit wide)
+            .TEM(1'b0),         // BIST mask for even bits  (1-bit wide)
+            .TOD(1'b0),         // BIST input for odd bits  (1-bit wide)
+            .TOM(1'b0),         // BIST mask for odd bits   (1-bit wide)
+            .SE(1'b0),          // Scan enable for memory scan chain  
+            .SCTRLI(1'b0),
+            .SDLI(1'b0),
+            .SDRI(1'b0),
+            .SMLI(1'b0),
+            .SMRI(1'b0),
+            
+            // Debugging pins
+            .INITN(1'b1)      // Reset memory FSM    
+        );
+      end
+  endgenerate 
   
   assign rdata_o = wQ;
 `else
