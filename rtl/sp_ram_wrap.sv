@@ -29,12 +29,6 @@ module sp_ram_wrap
   );
   
   // signals
-  wire rst = ~rstn_i;
-  wire [ADDR_WIDTH-3:0] wA = rst ? {(ADDR_WIDTH-2){1'b0}} : addr_i[ADDR_WIDTH-1:2]; // Convert to word-addressing
-  wire [DATA_WIDTH-1:0] wD = rst ? {DATA_WIDTH{1'b0}} : wdata_i;
-  wire wCEB = rst ? 1'b1 : !en_i; // Chip Enable (0 for enable)
-  wire wWEB = rst ? 1'b1 : !we_i; // Read/Write (1 for read)
-  wire [(DATA_WIDTH/4)-1:0] wBE = rst ? {(DATA_WIDTH/8){1'b0}} : be_i; // Byte enable (1 for enable)
   wire [DATA_WIDTH-1:0] wBWEB;
   wire [DATA_WIDTH-1:0] wQ;
   
@@ -42,7 +36,7 @@ module sp_ram_wrap
   genvar i;
   generate for(i = 0; i < DATA_WIDTH/8; i++)
       begin
-          assign wBWEB[(i+1)*8-1:i*8] = {8{!wBE[i]}}; // Bit enable (0 for enable)
+          assign wBWEB[(i+1)*8-1:i*8] = {8{!be_i[i]}}; // Bit enable (0 for enable)
       end
   endgenerate
   
@@ -65,19 +59,19 @@ module sp_ram_wrap
     //"/home/mwijtvliet/git/memories/ts1n40lpb8192x32m16m_210a/VERILOG/ts1n40lpb8192x32m16m_210a_ss0p99v125c.v"    
     TS1N40LPB8192X32M16M sp_ram_i
     (
-        .A(wA),
-        .D(wD),
+        .A(addr_i[ADDR_WIDTH-1:2]),
+        .D(wdata_i),
         .BWEB(wBWEB),
-        .WEB(wWEB),
-        .CEB(wCEB), // chip enable connected correctly?
+        .WEB(!we_i),
+        .CEB(!en_i), // chip enable connected correctly?
         .CLK(clk),
         .PD(wPD),
         .AWT(1'b0), // asynchronous write through (0 for disable)
-        .AM(wA),
-        .DM(wD),
+        .AM(addr_i[ADDR_WIDTH-1:2]),
+        .DM(wdata_i),
         .BWEBM(wBWEB),
-        .WEBM(wWEB),
-        .CEBM(wCEB),
+        .WEBM(!we_i),
+        .CEBM(!en_i),
         .RTSEL(2'b01), // recommended Read cycle timing setting
         .WTSEL(2'b01), // recommended Write cycle timing setting
         .BIST(1'b0),   // Normal mode
@@ -91,85 +85,27 @@ module sp_ram_wrap
   generate
     if (RAM_SIZE == 32768)
       begin : genmem	
-        ST_SPHD_BB_8192x32m16_baTdl sp_ram_i(
+        ST_SPHD_BB_8192x32m16_baTdl_wrapper sp_ram_i(
             .CK(clk),
-            .WEN(wWEB),
-            .D(wD),
-            .A(wA), 
+            .WEN(!we_i),
+            .D(wdata_i),
+            .A(addr_i[ADDR_WIDTH-1:2]),
             .Q(wQ),
             .M(wBWEB),
-            
-            // Power-saving pins
-            .CSN(wCEB),         // Chip Select (pull high to gate memory clock)
-            .IG(1'b0),          // Input gating pin (gates memory clock as well)
-            .STDBY(1'b0),       // Standby mode enable pin 
-            .SLEEP(1'b0),       // Power-down enable pin
-            .PSWSMALLMA(1'b0),  // Small embedded switch control for array
-            .PSWSMALLMP(1'b0),  // Small embedded switch control for periphery
-            .PSWLARGEMA(1'b0),  // Large embedded switch control for array
-            .PSWLARGEMP(1'b0),  // Large embedded switch control for periphery
-            
-            // Design For Test (DFT) related pins
-            .TBYPASS(1'b0),     // Memory bypass for test mode 
-            .ATP(1'b0),         // Enable DFT features (enable=1)
-            .TBIST(1'b0),       // BIST mode enable
-            .TCSN(1'b0),        // BIST chip select
-            .TWEN(1'b0),        // BIST write enable
-            .TA({ADDR_WIDTH-2{1'b0}}), // BIST address
-            .TED(1'b0),         // BIST input for even bits (1-bit wide)
-            .TEM(1'b0),         // BIST mask for even bits  (1-bit wide)
-            .TOD(1'b0),         // BIST input for odd bits  (1-bit wide)
-            .TOM(1'b0),         // BIST mask for odd bits   (1-bit wide)
-            .SE(1'b0),          // Scan enable for memory scan chain  
-            .SCTRLI(1'b0),
-            .SDLI(1'b0),
-            .SDRI(1'b0),
-            .SMLI(1'b0),
-            .SMRI(1'b0),
-            
-            // Debugging pins
-            .INITN(1'b1)      // Reset memory FSM    
+            .CSN(!en_i),
+            .INITN(1'b1)
         );
       end
     else begin : genmem
-        ST_SPHD_BB_4096x32m8_baTdl sp_ram_i(
+        ST_SPHD_BB_4096x32m8_baTdl_wrapper sp_ram_i(
             .CK(clk),
-            .WEN(wWEB),
-            .D(wD),
-            .A(wA), 
+            .WEN(!we_i),
+            .D(wdata_i),
+            .A(addr_i[ADDR_WIDTH-1:2]),
             .Q(wQ),
             .M(wBWEB),
-            
-            // Power-saving pins
-            .CSN(wCEB),         // Chip Select (pull high to gate memory clock)
-            .IG(1'b0),          // Input gating pin (gates memory clock as well)
-            .STDBY(1'b0),       // Standby mode enable pin 
-            .SLEEP(1'b0),       // Power-down enable pin
-            .PSWSMALLMA(1'b0),  // Small embedded switch control for array
-            .PSWSMALLMP(1'b0),  // Small embedded switch control for periphery
-            .PSWLARGEMA(1'b0),  // Large embedded switch control for array
-            .PSWLARGEMP(1'b0),  // Large embedded switch control for periphery
-            
-            // Design For Test (DFT) related pins
-            .TBYPASS(1'b0),     // Memory bypass for test mode 
-            .ATP(1'b0),         // Enable DFT features (enable=1)
-            .TBIST(1'b0),       // BIST mode enable
-            .TCSN(1'b0),        // BIST chip select
-            .TWEN(1'b0),        // BIST write enable
-            .TA({ADDR_WIDTH-2{1'b0}}), // BIST address
-            .TED(1'b0),         // BIST input for even bits (1-bit wide)
-            .TEM(1'b0),         // BIST mask for even bits  (1-bit wide)
-            .TOD(1'b0),         // BIST input for odd bits  (1-bit wide)
-            .TOM(1'b0),         // BIST mask for odd bits   (1-bit wide)
-            .SE(1'b0),          // Scan enable for memory scan chain  
-            .SCTRLI(1'b0),
-            .SDLI(1'b0),
-            .SDRI(1'b0),
-            .SMLI(1'b0),
-            .SMRI(1'b0),
-            
-            // Debugging pins
-            .INITN(1'b1)      // Reset memory FSM    
+            .CSN(!en_i),
+            .INITN(1'b1)
         );
       end
   endgenerate 

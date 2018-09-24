@@ -27,7 +27,7 @@ module peripherals
     input logic clk_i,
     input logic rst_n,
 
-    AXI_BUS.Master axi_spi_master,
+    //AXI_BUS.Master axi_spi_master,
 
     DEBUG_BUS.Master debug,
 
