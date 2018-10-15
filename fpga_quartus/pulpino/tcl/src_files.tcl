@@ -32,3 +32,8 @@ set SRC_PULPINO " \
    $FPGA_RTL/pulpino_wrap.v \
 "
 
+# memories
+set SRC_IPS " \
+   $IPS/altera_mem/altera_sp_ram_inst.v \
+   $IPS/altera_mem/altera_sp_ram_data.v \
+"

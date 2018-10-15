@@ -2,6 +2,7 @@
 package require ::quartus::project
 package require ::quartus::flow
 
+
 # Paths
 set PROJECT_DIR $env(PWD)
 puts "PROJECT_DIR = ${PROJECT_DIR}"
@@ -125,14 +126,15 @@ if {$make_assignments} {
     export_assignments
     
     # compile flags (append -remove to remove)
-    puts "TEST"
-    puts "USE_ZERO_RISCY=$::env(USE_ZERO_RISCY)"
     set_global_assignment -name VERILOG_MACRO "USE_ZERO_RISCY=$::env(USE_ZERO_RISCY)"
     set_global_assignment -name VERILOG_MACRO "RISCY_RV32F=$::env(RISCY_RV32F)"
     set_global_assignment -name VERILOG_MACRO "ZERO_RV32M=$::env(ZERO_RV32M)"
     set_global_assignment -name VERILOG_MACRO "ZERO_RV32E=$::env(ZERO_RV32E)"
     set_global_assignment -name VERILOG_MACRO "PULP_FPGA_EMUL=1"
+    set_global_assignment -name VERILOG_MACRO "QUARTUS=1"
     set_global_assignment -name VERILOG_MACRO "RISCV"
+    
+    set_global_assignment -name NUM_PARALLEL_PROCESSORS 4
     
     execute_flow -compile
 

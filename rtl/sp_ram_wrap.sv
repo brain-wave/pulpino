@@ -41,18 +41,31 @@ module sp_ram_wrap
   endgenerate
   
 `ifdef PULP_FPGA_EMUL
-  xilinx_mem_8192x32
-  sp_ram_i
-  (
-    .clka   ( clk                    ),
-    .rsta   ( 1'b0                   ), // reset is active high
+    `ifdef QUARTUS
+        altera_sp_ram_data 
+        sp_ram_i 
+        (
+            .address ( addr_i[ADDR_WIDTH-1:2] ),
+            .clock ( clk ),
+            .data ( wdata_i ),
+            .byteena ( be_i ),
+            .wren ( en_i & we_i ),
+            .q ( rdata_o )
+        );
+    `else
+        xilinx_mem_8192x32
+        sp_ram_i
+        (
+            .clka   ( clk                    ),
+            .rsta   ( 1'b0                   ), // reset is active high
 
-    .ena    ( en_i                   ),
-    .addra  ( addr_i[ADDR_WIDTH-1:2] ),
-    .dina   ( wdata_i                ),
-    .douta  ( rdata_o                ),
-    .wea    ( be_i & {4{we_i}}       )
-  );
+            .ena    ( en_i                   ),
+            .addra  ( addr_i[ADDR_WIDTH-1:2] ),
+            .dina   ( wdata_i                ),
+            .douta  ( rdata_o                ),
+            .wea    ( be_i & {4{we_i}}       )
+        );
+    `endif
 `elsif TSMC40
     wire wPD = 1'b0; // Power down (0 for Power up)
     
