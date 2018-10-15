@@ -214,6 +214,9 @@ module tb;
   initial
   begin
     int i;
+    integer fp;
+    integer addr;
+    logic [31:0] data;
 
 `ifdef SYNTHESIS
     $sdf_annotate("../../syn/pulpino_top.sdf",top_i,"sdf.cfg",,"MAXIMUM"); 
@@ -376,14 +379,31 @@ module tb;
         spi_master.send(0, {>>{8'h38}});
       end
     end
-
-
-
+    
     // end of computation
     $display("6");
     if (~gpio_out[8])
       wait(gpio_out[8]);
     $display("7");
+    
+    // dump DMEM content
+    fp = $fopen("GM_out.txt", "w");
+    for(addr = 0; addr < 32768/4; addr = addr+1) begin
+        //adv_dbg_if.axi4_read32(1048576 + 4*addr, 1, data); // read word: 0x00100000 + addr (very slow)
+`ifdef TSMC40
+        data = tb.top_i.core_region_i.data_mem.sp_ram_i.MEMORY[addr/16][addr%16];
+`elsif FDSOI28
+  `ifndef SYNTHESIS
+        data = tb.top_i.core_region_i.data_mem.genmem.sp_ram_i.I1.Mem[addr];
+  `else
+        data = tb.top_i.core_region_i.data_mem.sp_ram_i.I1.Mem[addr];
+  `endif
+`else
+        data = tb.top_i.core_region_i.data_mem.sp_ram_i.mem[addr]; // (much faster)
+`endif
+        $fwrite(fp, "%b\n", data);
+    end
+    $fclose(fp);
     
     spi_check_return_codes(exit_status);
     $display("8");

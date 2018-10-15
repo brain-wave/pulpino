@@ -128,7 +128,7 @@ module pulpino_top
     .AXI_ID_WIDTH   ( `AXI_ID_MASTER_WIDTH ),
     .AXI_USER_WIDTH ( `AXI_USER_WIDTH      )
   )
-  masters[2:0]();
+  masters[1:0](); // add 1 for SPI
 
   DEBUG_BUS
   debug();
@@ -218,21 +218,21 @@ module pulpino_top
     .clk_i           ( clk_int           ),
     .rst_n           ( rstn_int          ),
 
-    .axi_spi_master  ( masters[2]        ),
+    //.axi_spi_master  ( masters[2]      ),
     .debug           ( debug             ),
-
-    .spi_clk_i       ( spi_clk_i         ),
     .testmode_i      ( testmode_i        ),
-    .spi_cs_i        ( spi_cs_i          ),
-    .spi_mode_o      ( spi_mode_o        ),
-    .spi_sdo0_o      ( spi_sdo0_o        ),
-    .spi_sdo1_o      ( spi_sdo1_o        ),
-    .spi_sdo2_o      ( spi_sdo2_o        ),
-    .spi_sdo3_o      ( spi_sdo3_o        ),
-    .spi_sdi0_i      ( spi_sdi0_i        ),
-    .spi_sdi1_i      ( spi_sdi1_i        ),
-    .spi_sdi2_i      ( spi_sdi2_i        ),
-    .spi_sdi3_i      ( spi_sdi3_i        ),
+    
+    //.spi_clk_i       ( spi_clk_i         ),
+    //.spi_cs_i        ( spi_cs_i          ),
+    //.spi_mode_o      ( spi_mode_o        ),
+    //.spi_sdo0_o      ( spi_sdo0_o        ),
+    //.spi_sdo1_o      ( spi_sdo1_o        ),
+    //.spi_sdo2_o      ( spi_sdo2_o        ),
+    //.spi_sdo3_o      ( spi_sdo3_o        ),
+    //.spi_sdi0_i      ( spi_sdi0_i        ),
+    //.spi_sdi1_i      ( spi_sdi1_i        ),
+    //.spi_sdi2_i      ( spi_sdi2_i        ),
+    //.spi_sdi3_i      ( spi_sdi3_i        ),
 
     .slave           ( slaves[2]         ),
 
@@ -296,7 +296,7 @@ module pulpino_top
   axi_node_intf_wrap
   #(
     .NB_MASTER      ( 3                    ),
-    .NB_SLAVE       ( 3                    ),
+    .NB_SLAVE       ( 2                    ), // add 1 for SPI
     .AXI_ADDR_WIDTH ( `AXI_ADDR_WIDTH      ),
     .AXI_DATA_WIDTH ( `AXI_DATA_WIDTH      ),
     .AXI_ID_WIDTH   ( `AXI_ID_MASTER_WIDTH ),
