@@ -87,5 +87,4 @@ zero-riscy:
   commit: pulpinov1
 
 fpu:
-  remote: https://github.com/pulp-platform
   commit: pulpinov1

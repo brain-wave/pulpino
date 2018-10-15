@@ -35,7 +35,7 @@ module sp_ram_wrap
   // broadcast byte enable bits to bits
   genvar i;
   generate for(i = 0; i < DATA_WIDTH/8; i++)
-      begin
+      begin : srw_1
           assign wBWEB[(i+1)*8-1:i*8] = {8{!be_i[i]}}; // Bit enable (0 for enable)
       end
   endgenerate
