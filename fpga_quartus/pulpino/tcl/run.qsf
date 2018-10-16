@@ -81,51 +81,40 @@ if {[is_project_open]} {
 if {$make_assignments} {
     source ./pulpino/tcl/project_settings.tcl
     source ./pulpino/tcl/pin_assignments.tcl
-    
-    set_global_assignment -name SDC_FILE ./pulpino/pulpino_top.sdc
+    set_global_assignment -name SDC_FILE ./pulpino/tcl/constraints.sdc
+    ###set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
     
     # set up meaningful errors
     ##source ../common/messages.tcl
-
-    #set_global_assignment -name SEARCH_PATH /home/edbruin/projects/pulpino_fpga/ips/apb/apb_event_unit/include
-    #set_global_assignment -name SEARCH_PATH /home/edbruin/projects/pulpino_fpga/ips/zero-riscy/include
     
-    # add source files
+    # Define source files
     source ./pulpino/tcl/src_files.tcl
     source ./pulpino/tcl/ips_inc_dirs.tcl
     source ./pulpino/tcl/ips_src_files.tcl
-    
-    # add memory cuts
-    ##add_files -norecurse $FPGA_IPS/xilinx_mem_8192x32/ip/xilinx_mem_8192x32.dcp
-    ##add_files -norecurse $FPGA_IPS/xilinx_fp_fma/ip/xilinx_fp_fma.dcp
 
+    # Add IPs and Testbench files
     source ./pulpino/tcl/ips_add_files.tcl
     source ./pulpino/tcl/tb_add_files.tcl
     
+    # Add Pulpino files and memories
     if {$::env(USE_ZERO_RISCY)} {
-        #remove_files $SRC_RISCV_REGFILE_FPGA
-        #remove_files $SRC_RISCV
-        #add_files -norecurse -scan_for_includes $SRC_ZERORISCY_REGFILE_FPGA
-        #add_files -norecurse -scan_for_includes $SRC_ZERORISCY
+        foreach sv_file $SRC_ZERORISCY_REGFILE_FPGA { set_global_assignment -name SYSTEMVERILOG_FILE $sv_file }
+        foreach sv_file $SRC_ZERORISCY { set_global_assignment -name SYSTEMVERILOG_FILE $sv_file }
+        foreach sv_file $SRC_RISCV { set_global_assignment -name SYSTEMVERILOG_FILE $sv_file -remove }
+        foreach sv_file $SRC_RISCV_REGFILE_FPGA { set_global_assignment -name SYSTEMVERILOG_FILE $sv_file -remove }
     } else {
         foreach sv_file $SRC_ZERORISCY_REGFILE_FPGA { set_global_assignment -name SYSTEMVERILOG_FILE $sv_file -remove }
         foreach sv_file $SRC_ZERORISCY { set_global_assignment -name SYSTEMVERILOG_FILE $sv_file -remove }
         foreach sv_file $SRC_RISCV { set_global_assignment -name SYSTEMVERILOG_FILE $sv_file }
         foreach sv_file $SRC_RISCV_REGFILE_FPGA { set_global_assignment -name SYSTEMVERILOG_FILE $sv_file }
     }
-    # add components
     foreach sv_file $SRC_COMPONENTS { set_global_assignment -name SYSTEMVERILOG_FILE $sv_file }
-
-    # add pulpino
     foreach sv_file $SRC_PULPINO { set_global_assignment -name SYSTEMVERILOG_FILE $sv_file }
-
-    # set pulpino_top as top
-    set_global_assignment -name TOP_LEVEL_ENTITY pulpino_top
     
     # Commit assignments
     export_assignments
     
-    # compile flags (append -remove to remove)
+    # Compile flags (append -remove to remove)
     set_global_assignment -name VERILOG_MACRO "USE_ZERO_RISCY=$::env(USE_ZERO_RISCY)"
     set_global_assignment -name VERILOG_MACRO "RISCY_RV32F=$::env(RISCY_RV32F)"
     set_global_assignment -name VERILOG_MACRO "ZERO_RV32M=$::env(ZERO_RV32M)"
@@ -136,7 +125,11 @@ if {$make_assignments} {
     
     set_global_assignment -name NUM_PARALLEL_PROCESSORS 4
     
+    # Synthesize design
     execute_flow -compile
+    
+    # Create reports and save netlist
+    #TODO
 
     # Close project
     if {$need_to_close_project} {
