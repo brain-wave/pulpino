@@ -225,7 +225,8 @@ module tb;
     
     if(!$value$plusargs("MEMLOAD=%s", memload))
       memload = "PRELOAD";
-
+    memload = "SPI";
+    
     $display("Using %s core", USE_ZERO_RISCY ? "zero-riscy" : "ri5cy");
     
     use_qspi = SPI == "QUAD" ? 1'b1 : 1'b0;
@@ -387,6 +388,7 @@ module tb;
     $display("7");
     
     // dump DMEM content
+`ifndef PULP_FPGA_EMUL
     fp = $fopen("GM_out.txt", "w");
     for(addr = 0; addr < 32768/4; addr = addr+1) begin
         //adv_dbg_if.axi4_read32(1048576 + 4*addr, 1, data); // read word: 0x00100000 + addr (very slow)
@@ -404,6 +406,7 @@ module tb;
         $fwrite(fp, "%b\n", data);
     end
     $fclose(fp);
+`endif
     
     spi_check_return_codes(exit_status);
     $display("8");

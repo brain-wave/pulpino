@@ -125,7 +125,11 @@ if {$make_assignments} {
     
     set_global_assignment -name NUM_PARALLEL_PROCESSORS 4
     
-    # Synthesize design
+    # To run quartus_map, quartus_fit, quartus_tan, quartus_asm
+    # or other executables based on options. (Refer to "Using
+    # Compilation Flows," "Compiling Designs," and "Specifying
+    # Compiler Settings" in Quartus(R) II online Help for more
+    # information.)
     execute_flow -compile
     
     # Create reports and save netlist
