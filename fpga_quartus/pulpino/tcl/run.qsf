@@ -132,6 +132,10 @@ if {$make_assignments} {
     # information.)
     execute_flow -compile
     
+    # Print netlist (TODO: integrate)
+    # Info: Command: quartus_eda --read_settings_files=off --write_settings_files=off pulpino -c pulpino_top
+    # Info (204019): Generated file pulpino_top.svo in folder "/home/edbruin/projects/pulpino_fpga/fpga_quartus/simulation/modelsim/" for EDA simulation tool
+
     # Create reports and save netlist
     #TODO
 
