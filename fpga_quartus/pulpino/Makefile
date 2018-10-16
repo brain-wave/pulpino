@@ -1,26 +1,22 @@
-NAME:=RISCY
 PROJECT:=pulpino
+TOP_LEVEL:=pulpino_top
 
-all:
-	vivado -mode batch -source tcl/run.tcl
-	# ./postsynth_names.py
 
-gui:
-	vivado -mode gui -source tcl/run.tcl &
+synthesis:
+	@mkdir -p syn
+	@export FPGA_ROOT="/home/edbruin/projects/pulpino_fpga/fpga_quartus" && cd syn && quartus_sh -t ../tcl/run.qsf
+
+rtlgui:
+	@mkdir -p sim/rtl
+	@cd sim/rtl && ln -s /home/edbruin/projects/pulpino/sw/build/apps/helloworld/slm_files slm_files
+	@export PROJECT_ROOT="/home/edbruin/projects/pulpino_fpga" && export FPGA_ROOT="/home/edbruin/projects/pulpino_fpga/fpga_quartus" && cd sim/rtl && vsim -do ../../scripts/rtl_modelsim.do
+
+ntlgui:
+	@mkdir -p sim/syn
+	@cd sim/syn && ln -s /home/edbruin/projects/pulpino/sw/build/apps/helloworld/slm_files slm_files
+	@export PROJECT_ROOT="/home/edbruin/projects/pulpino_fpga" && export FPGA_ROOT="/home/edbruin/projects/pulpino_fpga/fpga_quartus" && cd sim/syn && vsim -do ../../scripts/modelsim.do
 
 clean:
-	rm -rf ${PROJECT}.xpr
-	rm -rf ${PROJECT}.data
-	rm -rf ${PROJECT}.runs
-	rm -rf ${PROJECT}.srcs
-	rm -rf ${PROJECT}.sim
-	rm -rf ${PROJECT}.cache
-	rm -rf ${PROJECT}.ioplanning
-	rm -rf ${PROJECT}.hw
-	rm -rf component.xml
-	rm -rf vivado*
-	rm -rf .Xil
-	rm -rf xgui
-	rm -rf ${PROJECT}.edn
-	rm -rf ${PROJECT}_stub.v
-	rm -rf ${PROJECT}_funcsim.v
+	@rm -rf syn
+	@rm -rf sim
+	@rm transcript

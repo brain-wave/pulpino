@@ -4,17 +4,16 @@ package require ::quartus::flow
 
 
 # Paths
-set PROJECT_DIR $env(PWD)
-puts "PROJECT_DIR = ${PROJECT_DIR}"
-set TB ${PROJECT_DIR}/../tb
-set RTL ${PROJECT_DIR}/../rtl
-set IPS ${PROJECT_DIR}/../ips
-set FPGA_IPS ${PROJECT_DIR}/ips
-set FPGA_RTL ${PROJECT_DIR}/rtl
+set FPGA_ROOT $::env(FPGA_ROOT)
+puts "FPGA_ROOT = ${FPGA_ROOT}"
+set TB ${FPGA_ROOT}/../tb
+set RTL ${FPGA_ROOT}/../rtl
+set IPS ${FPGA_ROOT}/../ips
+set FPGA_IPS ${FPGA_ROOT}/ips
+set FPGA_RTL ${FPGA_ROOT}/rtl
 
 set need_to_close_project 0
 set make_assignments 1
-set ::env(PULP_FPGA_EMUL) 1
 
 # Configuration
 if { ![info exists ::env(USE_ZERO_RISCY)] } {
@@ -79,22 +78,32 @@ if {[is_project_open]} {
 
 # make assignments
 if {$make_assignments} {
-    source ./pulpino/tcl/project_settings.tcl
-    source ./pulpino/tcl/pin_assignments.tcl
-    set_global_assignment -name SDC_FILE ./pulpino/tcl/constraints.sdc
-    ###set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+    set_global_assignment -name FAMILY "Cyclone V"
+    set_global_assignment -name DEVICE 5CSEMA5F31C6
+    set_global_assignment -name TOP_LEVEL_ENTITY pulpino
+    set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim (SystemVerilog)"
+    set_global_assignment -name ORIGINAL_QUARTUS_VERSION 17.0.0
+    #set_global_assignment -name PROJECT_CREATION_TIME_DATE "13:29:43  MARCH 14 2018"
+    set_global_assignment -name LAST_QUARTUS_VERSION "17.0.0 Lite Edition"
+    set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output
+    set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
+    set_global_assignment -name DEVICE_FILTER_PIN_COUNT 896
+    set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 6
+    
+    source $FPGA_ROOT/pulpino/tcl/pin_assignments.tcl
+    set_global_assignment -name SDC_FILE $FPGA_ROOT/pulpino/tcl/constraints.sdc
     
     # set up meaningful errors
     ##source ../common/messages.tcl
     
     # Define source files
-    source ./pulpino/tcl/src_files.tcl
-    source ./pulpino/tcl/ips_inc_dirs.tcl
-    source ./pulpino/tcl/ips_src_files.tcl
+    source $FPGA_ROOT/pulpino/tcl/src_files.tcl
+    source $FPGA_ROOT/pulpino/tcl/ips_inc_dirs.tcl
+    source $FPGA_ROOT/pulpino/tcl/ips_src_files.tcl
 
     # Add IPs and Testbench files
-    source ./pulpino/tcl/ips_add_files.tcl
-    source ./pulpino/tcl/tb_add_files.tcl
+    source $FPGA_ROOT/pulpino/tcl/ips_add_files.tcl
+    source $FPGA_ROOT/pulpino/tcl/tb_add_files.tcl
     
     # Add Pulpino files and memories
     if {$::env(USE_ZERO_RISCY)} {
@@ -131,12 +140,8 @@ if {$make_assignments} {
     # Compiler Settings" in Quartus(R) II online Help for more
     # information.)
     execute_flow -compile
-    
-    # Print netlist (TODO: integrate)
-    # Info: Command: quartus_eda --read_settings_files=off --write_settings_files=off pulpino -c pulpino_top
-    # Info (204019): Generated file pulpino_top.svo in folder "/home/edbruin/projects/pulpino_fpga/fpga_quartus/simulation/modelsim/" for EDA simulation tool
 
-    # Create reports and save netlist
+    # Create reports
     #TODO
 
     # Close project
