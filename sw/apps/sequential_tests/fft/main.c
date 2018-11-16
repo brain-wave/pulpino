@@ -70,7 +70,7 @@ int main() {
       printf("NOT OK!!!!!\n");
     } else {
       printf("Core %d, OK\n", core_id, 0, 0, 0);
-      printf ("OOOOOOK!!!!!!\n",0,0,0,0);
+      printf ("SUCCESS\n",0,0,0,0);
     }
 
   }

@@ -45,10 +45,33 @@ module random_stalls
     logic [31:0] rdata;
   } stall_mem_t;
 
-  mailbox core_reqs          = new (4);
-  mailbox core_resps         = new (4);
-  mailbox core_resps_granted = new (4);
-  mailbox platform_transfers = new (4);
+  // class mailbox_c;
+	// mailbox inst_mailbox;
+	// task set (int i);
+	// begin
+		// inst_mailbox = new(i);
+	// end task
+	// function get (stall_mem_t arg1);
+		// begin
+		// return  inst_mailbox.get(arg1);
+	// end function 
+	// function put (stall_mem_t arg1);
+		// begin
+		// return  inst_mailbox.put(arg1);
+	// end function
+  // end class
+  
+  
+  
+  mailbox_c core_reqs          = new(4);
+  mailbox_c core_resps         = new(4);
+  mailbox_c core_resps_granted = new(4);
+  mailbox_c platform_transfers = new(4);
+  
+  // core_reqs.set          = new (4);
+  // core_resps.set         = new (4);
+  // core_resps_granted.set = new (4);
+  // platform_transfers.set = new (4);
 
   // Core Request Side
   // Waits for requests and puts them in a queue, does not perform actual

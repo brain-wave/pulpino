@@ -60,7 +60,7 @@ void test_report(void) {
   printf("%d of %d checks failed\n", g_errors, g_num_checks);
 
   if(g_errors == 0)
-    printf ("OOOOOOK!!!!!!\n");
+    printf ("SUCCESS\n");
   else
     printf("NOT OK!!!!!\n");
 #endif

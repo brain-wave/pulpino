@@ -6,8 +6,10 @@ MESSAGE(STATUS "PL_NETLIST= ${PL_NETLIST}")
 MESSAGE("CMAKE_OBJCOPY= " ${CMAKE_OBJCOPY})
 MESSAGE("CMAKE_OBJDUMP= " ${CMAKE_OBJDUMP})
 
+MESSAGE("TEST= " ${CMAKE_SOURCE_DIR})
+
 macro(add_sim_targets NAME)
-  set(SETENV "env VSIM_DIR=${PULP_MODELSIM_DIRECTORY} USE_ZERO_RISCY=${USE_ZERO_RISCY} RISCY_RV32F=${RISCY_RV32F} ZERO_RV32M=${ZERO_RV32M} ZERO_RV32E=${ZERO_RV32E} PL_NETLIST=${PL_NETLIST} TB_TEST=\"$<TARGET_PROPERTY:${NAME}.elf,TB_TEST>\"")
+  set(SETENV "env SW_DIR=${CMAKE_SOURCE_DIR} VSIM_DIR=${PULP_MODELSIM_DIRECTORY} USE_ZERO_RISCY=${USE_ZERO_RISCY} RISCY_RV32F=${RISCY_RV32F} ZERO_RV32M=${ZERO_RV32M} ZERO_RV32E=${ZERO_RV32E} PL_NETLIST=${PL_NETLIST} TB_TEST=\"$<TARGET_PROPERTY:${NAME}.elf,TB_TEST>\"")
 
   # generate s19 file
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${SUBDIR}/${NAME}.s19
@@ -79,27 +81,34 @@ macro(add_sim_targets NAME)
   add_custom_target(${NAME}.vsim
     COMMAND ${CMAKE_COMMAND} -E remove stdout/*
     COMMAND ${CMAKE_COMMAND} -E remove FS/*
-    COMMAND tcsh -c "${SETENV} ${VSIM} -novopt -64 -do 'source tcl_files/$<TARGET_PROPERTY:${NAME}.elf,TB>\\;'"
+	COMMAND tcsh -c "${SETENV} ${CMAKE_SOURCE_DIR}/../vsim/tcl_files/run.tcl"
+	COMMAND tcsh -c "${SETENV} ${VSIM} tb.tb:sv -cdslib ${CMAKE_SOURCE_DIR}/../vsim/cds.lib -gui"
+    # COMMAND tcsh -c "${SETENV} ${VSIM} -novopt -64 -do 'source tcl_files/$<TARGET_PROPERTY:${NAME}.elf,TB>\\;'"
     WORKING_DIRECTORY ./${SUBDIR}
     DEPENDS ${NAME}.slm.cmd ${NAME}.stim.txt ${NAME}.links
-    COMMENT "Running ${NAME} in ModelSim"
+    COMMENT "Running ${NAME} in Incisive 2"
     ${USES_TERMINAL})
 
   # run in modelsim in batch mode, output is only generated after simulation terminates
   add_custom_target(${NAME}.vsimc
     COMMAND ${CMAKE_COMMAND} -E remove stdout/*
     COMMAND ${CMAKE_COMMAND} -E remove FS/*
-    COMMAND tcsh -c "${SETENV} ${VSIM} -novopt -c -64 -do 'source tcl_files/$<TARGET_PROPERTY:${NAME}.elf,TB>\\; run -a\\; exit\\;' >vsim.log"
+	COMMAND tcsh -c "${SETENV}  ${CMAKE_SOURCE_DIR}/../vsim/tcl_files/run.tcl"
+	COMMAND tcsh -c "${SETENV} ${VSIM} tb.tb:sv -cdslib ${CMAKE_SOURCE_DIR}/../vsim/cds.lib"
+    # COMMAND tcsh -c "${SETENV} ${VSIM} -nocop -c -64BIT 'source tcl_files/$<TARGET_PROPERTY:${NAME}.elf,TB>\\; run -a\\; exit\\;' >vsim.log"
+    # COMMAND tcsh -c "${SETENV} ${VSIM} -novopt -c -64 -do 'source tcl_files/$<TARGET_PROPERTY:${NAME}.elf,TB>\\; run -a\\; exit\\;' >vsim.log"
     COMMAND cat uart.out
     WORKING_DIRECTORY ./${SUBDIR}
     DEPENDS ${NAME}.slm.cmd ${NAME}.stim.txt ${NAME}.links
-    COMMENT "Running ${NAME} in ModelSim")
+    COMMENT "Running ${NAME} in Incisive")
 
   # run in modelsim with GUI
   add_custom_target(${NAME}.vsim.spi
     COMMAND ${CMAKE_COMMAND} -E remove stdout/*
     COMMAND ${CMAKE_COMMAND} -E remove FS/*
-    COMMAND tcsh -c "${SETENV} ${VSIM}  -64 -do 'source tcl_files/run_spi.tcl\\;'"
+	COMMAND tcsh -c "${SETENV} ${VSIM} ../tb/tb.sv"
+    # COMMAND tcsh -c "${SETENV} ${VSIM}  -64BIT 'source tcl_files/run_spi.tcl\\;'"
+    # COMMAND tcsh -c "${SETENV} ${VSIM}  -64 -do 'source tcl_files/run_spi.tcl\\;'"
     WORKING_DIRECTORY ./${SUBDIR}
     DEPENDS ${NAME}.slm.cmd ${NAME}.stim.txt ${NAME}.links
     COMMENT "Running ${NAME} in ModelSim"
@@ -109,12 +118,35 @@ macro(add_sim_targets NAME)
   add_custom_target(${NAME}.vsim.boot
     COMMAND ${CMAKE_COMMAND} -E remove stdout/*
     COMMAND ${CMAKE_COMMAND} -E remove FS/*
-    COMMAND tcsh -c "${SETENV} ${VSIM}  -64 -do 'source tcl_files/run_boot.tcl\\;'"
+	COMMAND tcsh -c "${SETENV} ${VSIM} ../tb/tb.sv"
+    # COMMAND tcsh -c "${SETENV} ${VSIM}  -64BIT 'source tcl_files/run_boot.tcl\\;'"
+    # COMMAND tcsh -c "${SETENV} ${VSIM}  -64 -do 'source tcl_files/run_boot.tcl\\;'"
     WORKING_DIRECTORY ./${SUBDIR}
     DEPENDS ${NAME}.slm.cmd ${NAME}.stim.txt ${NAME}.links
     COMMENT "Running ${NAME} in ModelSim"
     ${USES_TERMINAL})
 
+  #############################################################################
+  # coverage
+  #############################################################################
+	
+  add_custom_target(${NAME}.coverage
+    COMMAND ${CMAKE_COMMAND} -E remove stdout/*
+    COMMAND ${CMAKE_COMMAND} -E remove FS/*
+	COMMAND tcsh -c "${SETENV} ls ${CMAKE_SOURCE_DIR}/../vsim/coverage/${NAME}/scope/test"
+	COMMAND tcsh -c "${SETENV} imc -gui -load ${CMAKE_SOURCE_DIR}/../vsim/coverage/${NAME}/scope/test"
+    WORKING_DIRECTORY ./${SUBDIR}
+    COMMENT "Running coverage for ${NAME} in ICM"
+    ${USES_TERMINAL})	
+
+  add_custom_target(${NAME}.coverage.all
+    COMMAND ${CMAKE_COMMAND} -E remove stdout/*
+    COMMAND ${CMAKE_COMMAND} -E remove FS/*
+	COMMAND tcsh -c "${SETENV} ${CMAKE_SOURCE_DIR}/../vsim/tcl_files/run_coverage.tcl"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../vsim/tcl_files/
+    COMMENT "Running coverage for all tests in ICM"
+    ${USES_TERMINAL})
+	
   #############################################################################
   # post synthesis
   #############################################################################
@@ -122,7 +154,8 @@ macro(add_sim_targets NAME)
   add_custom_target(${NAME}.vsim.spi.ps
     COMMAND ${CMAKE_COMMAND} -E remove stdout/*
     COMMAND ${CMAKE_COMMAND} -E remove FS/*
-    COMMAND tcsh -c "${SETENV} ${VSIM}  -64 -do 'source tcl_files/run_spi_ps.tcl\\;'"
+	COMMAND tcsh -c "${SETENV} ${VSIM} ../tb/tb.sv"
+    # COMMAND tcsh -c "${SETENV} ${VSIM}  -64 -do 'source tcl_files/run_spi_ps.tcl\\;'"
     WORKING_DIRECTORY ./${SUBDIR}
     DEPENDS ${NAME}.slm.cmd ${NAME}.stim.txt ${NAME}.links
     COMMENT "Running ${NAME} in ModelSim (post synthesis)"
@@ -235,8 +268,9 @@ macro(add_sim_targets NAME)
   # testing targets
   #############################################################################
   add_test(NAME ${NAME}.test
-    COMMAND tcsh -c "${SETENV} ${VSIM}  -c -64 -do 'source tcl_files/$<TARGET_PROPERTY:${NAME}.elf,TB>; run_and_exit;'"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${SUBDIR})
+	#COMMAND tcsh -c " ${SETENV} irun -cdslib ${CMAKE_SOURCE_DIR}/../vsim/cds.lib -work tb ${CMAKE_SOURCE_DIR}/../tb/tb.sv -incdir ${CMAKE_SOURCE_DIR}/../rtl/includes  -incdir ${CMAKE_SOURCE_DIR}/../tb/  -access +rwc  -timescale 1ns/1ps  -notimingchecks -lib_binding"
+    COMMAND tcsh -c "${SETENV} ${CMAKE_SOURCE_DIR}/../vsim/tcl_files/run_test.tcl"
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${SUBDIR})
 
   ##############################################################################
   # Convenience

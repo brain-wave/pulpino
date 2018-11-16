@@ -1,6 +1,7 @@
+echo "vsim_zero.tcl"
 source tcl_files/config/vsim_ips.tcl
 
-set cmd "vsim -quiet $TB \
+set cmd "ncsim -quiet $TB \
   -L pulpino_lib \
   $VSIM_IP_LIBS \
   +nowarnTRAN \
@@ -20,3 +21,4 @@ proc run_and_exit {} {
   run -all
   quit -code [examine -radix decimal sim:/tb/exit_status]
 }
+echo "end vsim_zero.tcl"

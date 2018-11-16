@@ -209,7 +209,7 @@ int main()
       }
       int *DEFAULT_RESULT;
       if (error == 0) {
-	//printf ("OOOOOOK!!!!!!\n",0,0,0,0);
+	//printf ("SUCCESS\n",0,0,0,0);
 	DEFAULT_RESULT = (int*)0x10003ffc;
 	*(DEFAULT_RESULT) = 1;
       }

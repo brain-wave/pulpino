@@ -88,7 +88,7 @@ set(CMAKE_ASM_COMPILER "${CMAKE_C_COMPILER}")
 set(CMAKE_ASM_FLAGS    "${CMAKE_C_FLAGS}")
 
 set(PULP_MODELSIM_DIRECTORY "" CACHE PATH "Path to the ModelSim PULPino build")
-set(VSIM "vsim" CACHE FILEPATH "Path to the vsim executable")
+set(VSIM "ncsim" CACHE FILEPATH "Path to the vsim executable")
 
 ################################################################################
 

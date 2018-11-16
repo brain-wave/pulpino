@@ -91,9 +91,9 @@ void check_stencil(testresult_t *result, void (*start)(), void (*stop)())
   printf("\nchecksum0 = %d\n",check_sum0);
   if (check_sum0 == CHKSUM) {
     if (time0 < 6000)
-      printf("Part Vect OOOOOOK!!!!!! Time: %d\n",time0);
+      printf("SUCCESS Part Vect OOOOOOK!!!!!! Time: %d\n",time0);
     else
-      printf("Part Vect OOOOOOK!!!!!! But time=%d exceeded maximum of 6000 cycles\n",time0);
+      printf("SUCCESS Part Vect OOOOOOK!!!!!! But time=%d exceeded maximum of 6000 cycles\n",time0);
   }
   else {
     result->errors++;
@@ -104,9 +104,9 @@ void check_stencil(testresult_t *result, void (*start)(), void (*stop)())
   printf("\nchecksum1 = %d\n",check_sum1);
   if (check_sum0 == CHKSUM) {
     if (time0 < 6000)
-      printf("Full Vect OOOOOOK!!!!!! Time: %d\n",time0);
+      printf("SUCCESS Full Vect OOOOOOK!!!!!! Time: %d\n",time0);
     else
-      printf("Full Vect OOOOOOK!!!!!! But time=%d exceeded maximum of 6000 cycles\n",time0);
+      printf("SUCCESS Full Vect OOOOOOK!!!!!! But time=%d exceeded maximum of 6000 cycles\n",time0);
   }
   else {
     result->errors++;

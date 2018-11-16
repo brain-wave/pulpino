@@ -274,8 +274,8 @@ module tb;
       debug_tests();
     end else if (TEST == "DEBUG_IRQ") begin
       debug_irq_tests();
-    end else if (TEST == "MEM_DPI") begin
-      mem_dpi(4567);
+    //end else if (TEST == "MEM_DPI") begin
+    //  mem_dpi(4567);
     end else if (TEST == "ARDUINO_UART") begin
       if (~gpio_out[0])
         wait(gpio_out[0]);
@@ -405,10 +405,16 @@ module tb;
     end
     $fclose(fp);
     
+    $display("8");
     spi_check_return_codes(exit_status);
+	fp = $fopen("exit_status.txt", "w");
+	$fwrite(fp, "%d\n", exit_status);
+	$fclose(fp);
     $display("8");
     $fflush();
-    $stop();
+    $display("9");
+    $finish();
+    $display("10");
   end
 
   // TODO: this is a hack, do it properly!
@@ -419,6 +425,6 @@ module tb;
    `include "tb_mem_pkg.sv"
   `endif
   `include "spi_debug_test.svh"
-  `include "mem_dpi.svh"
+  //`include "mem_dpi.svh"
 
 endmodule

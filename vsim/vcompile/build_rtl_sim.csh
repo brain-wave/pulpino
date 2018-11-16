@@ -23,6 +23,8 @@ vlib modelsim_libs
 rm -rf work
 vlib work
 
+rm cds.lib
+
 echo ""
 echo "${Green}--> Compiling PULPino Platform... ${NC}"
 echo ""
@@ -31,7 +33,9 @@ echo ""
 source ${PULP_PATH}/vsim/vcompile/vcompile_ips.csh  || exit 1
 
 source ${PULP_PATH}/vsim/vcompile/rtl/vcompile_pulpino.sh  || exit 1
+
 source ${PULP_PATH}/vsim/vcompile/rtl/vcompile_tb.sh       || exit 1
+
 
 echo ""
 echo "${Green}--> PULPino platform compilation complete! ${NC}"

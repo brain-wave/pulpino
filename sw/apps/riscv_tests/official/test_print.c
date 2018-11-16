@@ -31,7 +31,7 @@ void print_test_summary()
   printf("==== SUMMARY: ");
 
   if (g_errors == 0) {
-    printf("OOOOOOK!!!!!!\n");
+    printf("SUCCESS\n");
   } else {
     printf("NOT OK!!!!!\n");
   }
