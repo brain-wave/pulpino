@@ -6,6 +6,7 @@
 
 import sys,os,subprocess,re
 
+brainwave_remote = "https://github.com/brain-wave"
 devnull = open(os.devnull, 'wb')
 
 def execute(cmd, silent=False):
@@ -21,11 +22,13 @@ def execute_out(cmd, silent=False):
     return out
 
 def find_server():
+    # Our default remote is 'upstream'
+    stdout = execute_out("git remote add upstream " + brainwave_remote)
     stdout = execute_out("git remote -v")
 
     stdout = stdout.split('\n')
     for line in stdout:
-        if "origin" in line:
+        if "upstream" in line:
             tmp = line.split(' ')
             tmp = tmp[0].split('\t')
 
