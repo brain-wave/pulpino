@@ -158,35 +158,3 @@ ipdb.update_ips(remote = remote)
 
 # launch generate-ips.py
 execute("./generate-scripts.py")
-
-if not vars().has_key('server'):
-    [server, group, remote] = find_server()
-
-print "Using remote git server %s, remote is %s" % (server, remote)
-
-
-# download IPApproX tools in ./ipstools and import them
-if os.path.exists("ipstools") and os.path.isdir("ipstools"):
-    cwd = os.getcwd()
-    os.chdir("ipstools")
-    execute("git pull origin verilator", silent=True)
-    os.chdir(cwd)
-    import ipstools
-else:
-    # try to find the ipstools repository
-    if "http" in remote:
-        if execute("git clone %s/IPApproX.git ipstools -b verilator" % (brainwave_remote)) != 0:
-            execute("git clone %s/pulp-tools/IPApproX.git ipstools -b verilator" % (server))
-    else:
-        if execute("git clone %s/IPApproX.git ipstools -b verilator" % (brainwave_remote)) != 0:
-            execute("git clone %s:pulp-tools/IPApproX.git ipstools -b verilator" % (server))
-
-    import ipstools
-
-# creates an IPApproX database
-ipdb = ipstools.IPDatabase(ips_dir="./ips", skip_scripts=True)
-# updates the IPs from the git repo
-ipdb.update_ips(remote = remote)
-
-# launch generate-ips.py
-execute("./generate-scripts.py")

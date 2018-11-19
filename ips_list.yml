@@ -22,7 +22,6 @@
 apb/apb_node:
   commit: pulpinov1
 apb/apb_event_unit:
-  remote: https://github.com/pulp-platform
   commit: pulpinov1
 apb/apb_fll_if:
   remote: https://github.com/pulp-platform
