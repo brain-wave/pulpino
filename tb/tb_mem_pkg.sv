@@ -25,25 +25,35 @@
     string       l2_dmem_file;
     begin
       $display("Preloading memory");
+      
 `ifdef TSMC40
-      instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.numBit;
-      instr_size   = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.numWord * instr_width/4;
+        instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.numBit;
+        instr_size = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.numWord * instr_width/8;
       
-      data_width = tb.top_i.core_region_i.data_mem.sp_ram_i.numBit;
-      data_size   = tb.top_i.core_region_i.data_mem.sp_ram_i.numWord * data_width/4;
+        data_width = tb.top_i.core_region_i.data_mem.sp_ram_i.numBit;
+        data_size = tb.top_i.core_region_i.data_mem.sp_ram_i.numWord * data_width/8;
 `elsif FDSOI28
-      instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.bits;
-      instr_size   = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.words * instr_width/4;
-      
-      data_width = tb.top_i.core_region_i.data_mem.sp_ram_i.bits;
-      data_size   = tb.top_i.core_region_i.data_mem.sp_ram_i.words * data_width/4;
+  `ifndef SYNTHESIS
+        instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.genmem.sp_ram_i.I1.bits;
+        instr_size = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.genmem.sp_ram_i.I1.words * instr_width/8;
+        
+        data_width = tb.top_i.core_region_i.data_mem.genmem.sp_ram_i.I1.bits;
+        data_size = tb.top_i.core_region_i.data_mem.genmem.sp_ram_i.I1.words * data_width/8;
+  `else // note: the spaces are necessary to escape the backslash (don't ask me why it works)
+        instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.\genmem.sp_ram_i .I1.bits;
+        instr_size = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.\genmem.sp_ram_i .I1.words * instr_width/8;
+        
+        data_width = tb.top_i.core_region_i.data_mem.\genmem.sp_ram_i .I1.bits;
+        data_size = tb.top_i.core_region_i.data_mem.\genmem.sp_ram_i .I1.words * data_width/8;
+  `endif
 `else
-      instr_size = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.RAM_SIZE;
-      instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.DATA_WIDTH;
+        instr_size = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.RAM_SIZE;
+        instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.DATA_WIDTH;
 
-      data_size = tb.top_i.core_region_i.data_mem.RAM_SIZE;
-      data_width = tb.top_i.core_region_i.data_mem.DATA_WIDTH;
+        data_size = tb.top_i.core_region_i.data_mem.RAM_SIZE;
+        data_width = tb.top_i.core_region_i.data_mem.DATA_WIDTH;
 `endif
+      
       instr_mem = new [instr_size/4];
       data_mem  = new [data_size/4];
 
@@ -60,65 +70,77 @@
       $readmemh(l2_dmem_file, data_mem);
 
 `ifdef TSMC40
-      // preload data memory
-      for (addr = 0; addr < data_size/4; addr = addr + 1) begin
-          tb.top_i.core_region_i.data_mem.sp_ram_i.MEMORY[addr/16][addr%16] = data_mem[addr];
-      end
+        // preload data memory
+        for (addr = 0; addr < data_size/4; addr = addr + 1) begin
+            tb.top_i.core_region_i.data_mem.sp_ram_i.MEMORY[addr/16][addr%16] = data_mem[addr];
+        end
 
-      // preload instruction memory
-      for (addr = 0; addr < data_size/4; addr = addr + 1) begin
-          tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.MEMORY[addr/16][addr%16] = instr_mem[addr];
-      end
+        // preload instruction memory
+        for (addr = 0; addr < instr_size/4; addr = addr + 1) begin
+            tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.MEMORY[addr/16][addr%16] = instr_mem[addr];
+        end
 `elsif FDSOI28
-      // preload data memory
-      for (addr = 0; addr < data_size/4; addr = addr + 1) begin
-          tb.top_i.core_region_i.data_mem.sp_ram_i.Mem[addr] = data_mem[addr];
-      end
+  `ifndef SYNTHESIS
+        // preload data memory
+        for (addr = 0; addr < data_size/4; addr = addr + 1) begin
+            tb.top_i.core_region_i.data_mem.genmem.sp_ram_i.I1.Mem[addr] = data_mem[addr];
+        end
 
-      // preload instruction memory
-      for (addr = 0; addr < data_size/4; addr = addr + 1) begin
-          tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.Mem[addr] = instr_mem[addr];
-      end
+        // preload instruction memory
+        for (addr = 0; addr < instr_size/4; addr = addr + 1) begin
+            tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.genmem.sp_ram_i.I1.Mem[addr] = instr_mem[addr];
+        end
+  `else
+        // preload data memory
+        for (addr = 0; addr < data_size/4; addr = addr + 1) begin
+            tb.top_i.core_region_i.data_mem.\genmem.sp_ram_i .I1.Mem[addr] = data_mem[addr];
+        end
+
+        // preload instruction memory
+        for (addr = 0; addr < instr_size/4; addr = addr + 1) begin
+            tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.\genmem.sp_ram_i .I1.Mem[addr] = instr_mem[addr];
+        end
+  `endif
 `else
-      // preload data memory
-      for(addr = 0; addr < data_size/4; addr = addr) begin
+        // preload data memory
+        for(addr = 0; addr < data_size/4; addr = addr) begin
 
-        for(bidx = 0; bidx < data_width/8; bidx++) begin
-          mem_addr = addr / (data_width/32);
-          data = data_mem[addr];
+            for(bidx = 0; bidx < data_width/8; bidx++) begin
+            mem_addr = addr / (data_width/32);
+            data = data_mem[addr];
 
-          if (bidx%4 == 0)
-            tb.top_i.core_region_i.data_mem.sp_ram_i.mem[mem_addr][bidx] = data[ 7: 0];
-          else if (bidx%4 == 1)
-            tb.top_i.core_region_i.data_mem.sp_ram_i.mem[mem_addr][bidx] = data[15: 8];
-          else if (bidx%4 == 2)
-            tb.top_i.core_region_i.data_mem.sp_ram_i.mem[mem_addr][bidx] = data[23:16];
-          else if (bidx%4 == 3)
-            tb.top_i.core_region_i.data_mem.sp_ram_i.mem[mem_addr][bidx] = data[31:24];
+            if (bidx%4 == 0)
+                tb.top_i.core_region_i.data_mem.sp_ram_i.mem[mem_addr][bidx] = data[ 7: 0];
+            else if (bidx%4 == 1)
+                tb.top_i.core_region_i.data_mem.sp_ram_i.mem[mem_addr][bidx] = data[15: 8];
+            else if (bidx%4 == 2)
+                tb.top_i.core_region_i.data_mem.sp_ram_i.mem[mem_addr][bidx] = data[23:16];
+            else if (bidx%4 == 3)
+                tb.top_i.core_region_i.data_mem.sp_ram_i.mem[mem_addr][bidx] = data[31:24];
 
-          if (bidx%4 == 3) addr++;
+            if (bidx%4 == 3) addr++;
+            end
         end
-      end
 
-      // preload instruction memory
-      for(addr = 0; addr < instr_size/4; addr = addr) begin
+        // preload instruction memory
+        for(addr = 0; addr < instr_size/4; addr = addr) begin
 
-        for(bidx = 0; bidx < instr_width/8; bidx++) begin
-          mem_addr = addr / (instr_width/32);
-          data = instr_mem[addr];
+            for(bidx = 0; bidx < instr_width/8; bidx++) begin
+            mem_addr = addr / (instr_width/32);
+            data = instr_mem[addr];
 
-          if (bidx%4 == 0)
-            tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.mem[mem_addr][bidx] = data[ 7: 0];
-          else if (bidx%4 == 1)
-            tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.mem[mem_addr][bidx] = data[15: 8];
-          else if (bidx%4 == 2)
-            tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.mem[mem_addr][bidx] = data[23:16];
-          else if (bidx%4 == 3)
-            tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.mem[mem_addr][bidx] = data[31:24];
+            if (bidx%4 == 0)
+                tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.mem[mem_addr][bidx] = data[ 7: 0];
+            else if (bidx%4 == 1)
+                tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.mem[mem_addr][bidx] = data[15: 8];
+            else if (bidx%4 == 2)
+                tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.mem[mem_addr][bidx] = data[23:16];
+            else if (bidx%4 == 3)
+                tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.mem[mem_addr][bidx] = data[31:24];
 
-          if (bidx%4 == 3) addr++;
+            if (bidx%4 == 3) addr++;
+            end
         end
-      end
 `endif
     end
   endtask

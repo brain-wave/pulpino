@@ -435,7 +435,7 @@ class adv_dbg_if_t;
    endtask
 
    ///*
-   task axi_write_2(input [4:0] write_size, input logic[31:0] addr, input int nwords, input logic [31:0] data[]);
+   task axi_write_burst(input [4:0] write_size, input logic[31:0] addr, input int nwords, input logic [31:0] data[]);
       logic [255:0] dataout;
       int bit_size = 32;
 
@@ -451,49 +451,84 @@ class adv_dbg_if_t;
       jtag_cluster_dbg.idle();
       $display("[adv_dbg_if] AXI4 WRITE%d burst @%h for %d bytes.", bit_size, addr, nwords*4);
    endtask
-   /*
-    //logic [31:0] data_mem[8192-1:0];  // this variable holds the whole memory content
-    //logic [31:0] instr_mem[8192-1:0]; // this variable holds the whole memory content
+
    
-    task jtag_load;
+  task jtag_load;
+        // preload memories
+        logic [31:0]     data_mem[];  // this variable holds the whole memory content
+        logic [31:0]     instr_mem[]; // this variable holds the whole memory content
+        event            event_mem_load;
+
+        //task mem_preload;
         integer      addr;
         integer      mem_addr;
         integer      bidx;
         integer      instr_size;
+        integer      instr_width;
         integer      data_size;
-
+        integer      data_width;
         logic [31:0] data;
         string       l2_imem_file;
         string       l2_dmem_file;
-        logic [31:0]     data_mem[];  // this variable holds the whole memory content
-        logic [31:0]     instr_mem[]; // this variable holds the whole memory content
-            
-        begin
-            $display("Preloading memory via JTAG");    
+        
+        $display("Preloading memory using JTAG");
+`ifdef TSMC40
+        instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.numBit;
+        instr_size   = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.sp_ram_i.numWord * instr_width/8;
+      
+        data_width = tb.top_i.core_region_i.data_mem.sp_ram_i.numBit;
+        data_size   = tb.top_i.core_region_i.data_mem.sp_ram_i.numWord * data_width/8;
+`elsif FDSOI28
+  `ifndef SYNTHESIS
+        instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.genmem.sp_ram_i.I1.bits;
+        instr_size   = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.genmem.sp_ram_i.I1.words * instr_width/8;
+        
+        data_width = tb.top_i.core_region_i.data_mem.genmem.sp_ram_i.I1.bits;
+        data_size   = tb.top_i.core_region_i.data_mem.genmem.sp_ram_i.I1.words * data_width/8;
+  `else
+        instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.\genmem.sp_ram_i .I1.bits;
+        instr_size   = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.\genmem.sp_ram_i .I1.words * instr_width/8;
+        
+        data_width = tb.top_i.core_region_i.data_mem.\genmem.sp_ram_i .I1.bits;
+        data_size   = tb.top_i.core_region_i.data_mem.\genmem.sp_ram_i .I1.words * data_width/8;
+  `endif
+`else
+        instr_size   = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.RAM_SIZE;
+        instr_width = tb.top_i.core_region_i.instr_mem.sp_ram_wrap_i.DATA_WIDTH;
 
-            
-            instr_size = 32768; // bytes
-            data_size = 32768; // bytes
-            
-            instr_mem = new [instr_size/4];
-            data_mem  = new [data_size/4];
-            
-            if(!$value$plusargs("l2_imem=%s", l2_imem_file))
-                l2_imem_file = "slm_files/l2_stim.slm";
+        data_size   = tb.top_i.core_region_i.data_mem.RAM_SIZE;
+        data_width = tb.top_i.core_region_i.data_mem.DATA_WIDTH;
+`endif
+        instr_mem = new [instr_size/4];
+        data_mem  = new [data_size/4];
 
-            $display("Preloading instruction memory from %0s", l2_imem_file);
-            $readmemh(l2_imem_file, instr_mem);
-
-            if(!$value$plusargs("l2_dmem=%s", l2_dmem_file))
-                l2_dmem_file = "slm_files/tcdm_bank0.slm";
-
-            $display("Preloading data memory from %0s", l2_dmem_file);
-            $readmemh(l2_dmem_file, data_mem);
-            
-
+        if(!$value$plusargs("l2_imem=%s", l2_imem_file)) begin
+            l2_imem_file = "slm_files/l2_stim.slm";
         end
-    endtask
-    
+        $display("Preloading instruction memory from %0s", l2_imem_file);
+        $readmemh(l2_imem_file, instr_mem);
+
+        if(!$value$plusargs("l2_dmem=%s", l2_dmem_file)) begin
+            l2_dmem_file = "slm_files/tcdm_bank0.slm";
+        end
+        $display("Preloading data memory from %0s", l2_dmem_file);
+        $readmemh(l2_dmem_file, data_mem);
+        
+        // preload data memory
+        for(addr = 0; addr < data_size/4; addr = addr + 1) begin
+            if (data_mem[addr] === 32'hxxxx_xxxx)
+                data_mem[addr] = 32'h0;
+        end
+        addr = 32'h0010_0000;
+        this.axi_write_burst(5'h3, addr, data_size/4, data_mem); 
+        
+        // preload instruction memory
+        for(addr = 0; addr < instr_size/4; addr = addr + 1) begin
+            if (instr_mem[addr] === 32'hxxxx_xxxx)
+                instr_mem[addr] = 32'h0;
+        end
+        addr = 32'h0000_0000;
+        this.axi_write_burst(5'h3, addr, instr_size/4, instr_mem); 
+  endtask
    
-   */
 endclass

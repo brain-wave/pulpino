@@ -27,12 +27,12 @@ module peripherals
     input logic clk_i,
     input logic rst_n,
 
-    //AXI_BUS.Master axi_spi_master,
+    AXI_BUS.Master axi_spi_master, // COMMENT!
 
     DEBUG_BUS.Master debug,
 
     input  logic             testmode_i,
-    /*
+    ///*
     input  logic             spi_clk_i,
     input  logic             spi_cs_i,
     output logic [1:0]       spi_mode_o,
@@ -44,7 +44,7 @@ module peripherals
     input  logic             spi_sdi1_i,
     input  logic             spi_sdi2_i,
     input  logic             spi_sdi3_i,
-    */
+    //*/
 
     AXI_BUS.Slave  slave,
 
@@ -84,6 +84,8 @@ module peripherals
 
     input  logic              core_busy_i,
     output logic [31:0]       irq_o,
+    input  logic              irq_ack_i,
+    input  logic        [4:0] irq_id_i,
     input  logic              fetch_enable_i,
     output logic              fetch_enable_o,
     output logic              clk_gate_core_o,
@@ -148,7 +150,7 @@ module peripherals
   /// SPI Slave, AXI Master                                      ///
   ///                                                            ///
   //////////////////////////////////////////////////////////////////
-/*
+///*
   axi_spi_slave_wrap
   #(
     .AXI_ADDRESS_WIDTH  ( AXI_ADDR_WIDTH       ),
@@ -177,7 +179,7 @@ module peripherals
     .spi_sdi2   ( spi_sdi2_i     ),
     .spi_sdi3   ( spi_sdi3_i     )
   );
-*/
+//*/
 
   //////////////////////////////////////////////////////////////////
   ///                                                            ///
@@ -409,6 +411,8 @@ module peripherals
     .irq_i            ( {timer_irq, s_spim_event, s_gpio_event, s_uart_event, i2c_event, 23'b0} ),
     .event_i          ( {timer_irq, s_spim_event, s_gpio_event, s_uart_event, i2c_event, 23'b0} ),
     .irq_o            ( irq_o              ),
+    .irq_ack_i        ( irq_ack_i          ),
+    .irq_id_i         ( irq_id_i           ),
 
     .fetch_enable_i   ( fetch_enable_i     ),
     .fetch_enable_o   ( fetch_enable_o     ),

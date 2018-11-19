@@ -29,11 +29,11 @@ module pulpino_top
     input logic               clk /*verilator clocker*/,
     input logic               rst_n,
 
-    input  logic              clk_sel_i,
-    input  logic              clk_standalone_i,
-    input  logic              testmode_i,
-    input  logic              fetch_enable_i,
-    input  logic              scan_enable_i,
+    input  logic              clk_sel_i, /* clock select between FLL output and external clock; connect to 0 to use external clock */
+    input  logic              clk_standalone_i, /* used by FLL; connect to 0 since not used */
+    input  logic              testmode_i, /* test mode; used by all blocks but connected to 0 in testbench */
+    input  logic              fetch_enable_i, /* do we need this outside?? cant we just enable it via SPI or JTAG */
+    input  logic              scan_enable_i, /* used by FLL; connect to 0 since not used */
 
     //SPI Slave
     input  logic              spi_clk_i /*verilator clocker*/,
@@ -78,7 +78,7 @@ module pulpino_top
     input  logic              uart_cts,
     input  logic              uart_dsr,
 
-    input  logic       [31:0] gpio_in,
+    input  logic       [31:0] gpio_in, /* TODO: only use GPIO 0 to 7*/
     output logic       [31:0] gpio_out,
     output logic       [31:0] gpio_dir,
     output logic [31:0] [5:0] gpio_padcfg,
@@ -101,6 +101,8 @@ module pulpino_top
   logic        core_busy_int;
   logic        clk_gate_core_int;
   logic [31:0] irq_to_core_int;
+  logic        irq_ack_from_core_int;
+  logic  [4:0] irq_id_from_core_int;
 
   logic        lock_fll_int;
   logic        cfgreq_fll_int;
@@ -128,7 +130,7 @@ module pulpino_top
     .AXI_ID_WIDTH   ( `AXI_ID_MASTER_WIDTH ),
     .AXI_USER_WIDTH ( `AXI_USER_WIDTH      )
   )
-  masters[1:0](); // add 1 for SPI
+  masters[2:0]();
 
   DEBUG_BUS
   debug();
@@ -179,27 +181,29 @@ module pulpino_top
   )
   core_region_i
   (
-    .clk            ( clk_int           ),
-    .rst_n          ( rstn_int          ),
+    .clk            ( clk_int               ),
+    .rst_n          ( rstn_int              ),
 
-    .testmode_i     ( testmode_i        ),
-    .fetch_enable_i ( fetch_enable_int  ),
-    .irq_i          ( irq_to_core_int   ),
-    .core_busy_o    ( core_busy_int     ),
-    .clock_gating_i ( clk_gate_core_int ),
-    .boot_addr_i    ( boot_addr_int     ),
+    .testmode_i     ( testmode_i            ),
+    .fetch_enable_i ( fetch_enable_int      ),
+    .irq_i          ( irq_to_core_int       ),
+    .irq_ack_o      ( irq_ack_from_core_int ),
+    .irq_id_o       ( irq_id_from_core_int  ),
+    .core_busy_o    ( core_busy_int         ),
+    .clock_gating_i ( clk_gate_core_int     ),
+    .boot_addr_i    ( boot_addr_int         ),
 
-    .core_master    ( masters[0]        ),
-    .dbg_master     ( masters[1]        ),
-    .data_slave     ( slaves[1]         ),
-    .instr_slave    ( slaves[0]         ),
-    .debug          ( debug             ),
+    .core_master    ( masters[0]            ),
+    .dbg_master     ( masters[1]            ),
+    .data_slave     ( slaves[1]             ),
+    .instr_slave    ( slaves[0]             ),
+    .debug          ( debug                 ),
 
-    .tck_i          ( tck_i             ),
-    .trstn_i        ( trstn_i           ),
-    .tms_i          ( tms_i             ),
-    .tdi_i          ( tdi_i             ),
-    .tdo_o          ( tdo_o             )
+    .tck_i          ( tck_i                 ),
+    .trstn_i        ( trstn_i               ),
+    .tms_i          ( tms_i                 ),
+    .tdi_i          ( tdi_i                 ),
+    .tdo_o          ( tdo_o                 )
   );
 
   //----------------------------------------------------------------------------//
@@ -215,77 +219,80 @@ module pulpino_top
   )
   peripherals_i
   (
-    .clk_i           ( clk_int           ),
-    .rst_n           ( rstn_int          ),
+    .clk_i           ( clk_int               ),
+    .rst_n           ( rstn_int              ),
 
-    //.axi_spi_master  ( masters[2]      ),
-    .debug           ( debug             ),
-    .testmode_i      ( testmode_i        ),
-    
-    //.spi_clk_i       ( spi_clk_i         ),
-    //.spi_cs_i        ( spi_cs_i          ),
-    //.spi_mode_o      ( spi_mode_o        ),
-    //.spi_sdo0_o      ( spi_sdo0_o        ),
-    //.spi_sdo1_o      ( spi_sdo1_o        ),
-    //.spi_sdo2_o      ( spi_sdo2_o        ),
-    //.spi_sdo3_o      ( spi_sdo3_o        ),
-    //.spi_sdi0_i      ( spi_sdi0_i        ),
-    //.spi_sdi1_i      ( spi_sdi1_i        ),
-    //.spi_sdi2_i      ( spi_sdi2_i        ),
-    //.spi_sdi3_i      ( spi_sdi3_i        ),
+    .axi_spi_master  ( masters[2]        ), // COMMENT
+    .debug           ( debug                 ),
+    .testmode_i      ( testmode_i            ),
 
-    .slave           ( slaves[2]         ),
+///*
+    .spi_clk_i       ( spi_clk_i         ),
+    .spi_cs_i        ( spi_cs_i          ),
+    .spi_mode_o      ( spi_mode_o        ),
+    .spi_sdo0_o      ( spi_sdo0_o        ),
+    .spi_sdo1_o      ( spi_sdo1_o        ),
+    .spi_sdo2_o      ( spi_sdo2_o        ),
+    .spi_sdo3_o      ( spi_sdo3_o        ),
+    .spi_sdi0_i      ( spi_sdi0_i        ),
+    .spi_sdi1_i      ( spi_sdi1_i        ),
+    .spi_sdi2_i      ( spi_sdi2_i        ),
+    .spi_sdi3_i      ( spi_sdi3_i        ),
+//*/
+    .slave           ( slaves[2]             ),
 
-    .uart_tx         ( uart_tx           ),
-    .uart_rx         ( uart_rx           ),
-    .uart_rts        ( uart_rts          ),
-    .uart_dtr        ( uart_dtr          ),
-    .uart_cts        ( uart_cts          ),
-    .uart_dsr        ( uart_dsr          ),
+    .uart_tx         ( uart_tx               ),
+    .uart_rx         ( uart_rx               ),
+    .uart_rts        ( uart_rts              ),
+    .uart_dtr        ( uart_dtr              ),
+    .uart_cts        ( uart_cts              ),
+    .uart_dsr        ( uart_dsr              ),
 
-    .spi_master_clk  ( spi_master_clk_o  ),
-    .spi_master_csn0 ( spi_master_csn0_o ),
-    .spi_master_csn1 ( spi_master_csn1_o ),
-    .spi_master_csn2 ( spi_master_csn2_o ),
-    .spi_master_csn3 ( spi_master_csn3_o ),
-    .spi_master_mode ( spi_master_mode_o ),
-    .spi_master_sdo0 ( spi_master_sdo0_o ),
-    .spi_master_sdo1 ( spi_master_sdo1_o ),
-    .spi_master_sdo2 ( spi_master_sdo2_o ),
-    .spi_master_sdo3 ( spi_master_sdo3_o ),
-    .spi_master_sdi0 ( spi_master_sdi0_i ),
-    .spi_master_sdi1 ( spi_master_sdi1_i ),
-    .spi_master_sdi2 ( spi_master_sdi2_i ),
-    .spi_master_sdi3 ( spi_master_sdi3_i ),
+    .spi_master_clk  ( spi_master_clk_o      ),
+    .spi_master_csn0 ( spi_master_csn0_o     ),
+    .spi_master_csn1 ( spi_master_csn1_o     ),
+    .spi_master_csn2 ( spi_master_csn2_o     ),
+    .spi_master_csn3 ( spi_master_csn3_o     ),
+    .spi_master_mode ( spi_master_mode_o     ),
+    .spi_master_sdo0 ( spi_master_sdo0_o     ),
+    .spi_master_sdo1 ( spi_master_sdo1_o     ),
+    .spi_master_sdo2 ( spi_master_sdo2_o     ),
+    .spi_master_sdo3 ( spi_master_sdo3_o     ),
+    .spi_master_sdi0 ( spi_master_sdi0_i     ),
+    .spi_master_sdi1 ( spi_master_sdi1_i     ),
+    .spi_master_sdi2 ( spi_master_sdi2_i     ),
+    .spi_master_sdi3 ( spi_master_sdi3_i     ),
 
-    .scl_pad_i       ( scl_pad_i         ),
-    .scl_pad_o       ( scl_pad_o         ),
-    .scl_padoen_o    ( scl_padoen_o      ),
-    .sda_pad_i       ( sda_pad_i         ),
-    .sda_pad_o       ( sda_pad_o         ),
-    .sda_padoen_o    ( sda_padoen_o      ),
+    .scl_pad_i       ( scl_pad_i             ),
+    .scl_pad_o       ( scl_pad_o             ),
+    .scl_padoen_o    ( scl_padoen_o          ),
+    .sda_pad_i       ( sda_pad_i             ),
+    .sda_pad_o       ( sda_pad_o             ),
+    .sda_padoen_o    ( sda_padoen_o          ),
 
-    .gpio_in         ( gpio_in           ),
-    .gpio_out        ( gpio_out          ),
-    .gpio_dir        ( gpio_dir          ),
-    .gpio_padcfg     ( gpio_padcfg       ),
+    .gpio_in         ( gpio_in               ),
+    .gpio_out        ( gpio_out              ),
+    .gpio_dir        ( gpio_dir              ),
+    .gpio_padcfg     ( gpio_padcfg           ),
 
-    .core_busy_i     ( core_busy_int     ),
-    .irq_o           ( irq_to_core_int   ),
-    .fetch_enable_i  ( fetch_enable_i    ),
-    .fetch_enable_o  ( fetch_enable_int  ),
-    .clk_gate_core_o ( clk_gate_core_int ),
+    .core_busy_i     ( core_busy_int         ),
+    .irq_o           ( irq_to_core_int       ),
+    .irq_ack_i       ( irq_ack_from_core_int ),
+    .irq_id_i        ( irq_id_from_core_int  ),
+    .fetch_enable_i  ( fetch_enable_i        ),
+    .fetch_enable_o  ( fetch_enable_int      ),
+    .clk_gate_core_o ( clk_gate_core_int     ),
 
-    .fll1_req_o      ( cfgreq_fll_int    ),
-    .fll1_wrn_o      ( cfgweb_n_fll_int  ),
-    .fll1_add_o      ( cfgad_fll_int     ),
-    .fll1_wdata_o    ( cfgd_fll_int      ),
-    .fll1_ack_i      ( cfgack_fll_int    ),
-    .fll1_rdata_i    ( cfgq_fll_int      ),
-    .fll1_lock_i     ( lock_fll_int      ),
-    .pad_cfg_o       ( pad_cfg_o         ),
-    .pad_mux_o       ( pad_mux_o         ),
-    .boot_addr_o     ( boot_addr_int     )
+    .fll1_req_o      ( cfgreq_fll_int        ),
+    .fll1_wrn_o      ( cfgweb_n_fll_int      ),
+    .fll1_add_o      ( cfgad_fll_int         ),
+    .fll1_wdata_o    ( cfgd_fll_int          ),
+    .fll1_ack_i      ( cfgack_fll_int        ),
+    .fll1_rdata_i    ( cfgq_fll_int          ),
+    .fll1_lock_i     ( lock_fll_int          ),
+    .pad_cfg_o       ( pad_cfg_o             ),
+    .pad_mux_o       ( pad_mux_o             ),
+    .boot_addr_o     ( boot_addr_int         )
   );
 
 
@@ -296,7 +303,7 @@ module pulpino_top
   axi_node_intf_wrap
   #(
     .NB_MASTER      ( 3                    ),
-    .NB_SLAVE       ( 2                    ), // add 1 for SPI
+    .NB_SLAVE       ( 3                    ),
     .AXI_ADDR_WIDTH ( `AXI_ADDR_WIDTH      ),
     .AXI_DATA_WIDTH ( `AXI_DATA_WIDTH      ),
     .AXI_ID_WIDTH   ( `AXI_ID_MASTER_WIDTH ),

@@ -35,6 +35,8 @@ module core_region
     input  logic        testmode_i,
     input  logic        fetch_enable_i,
     input  logic [31:0] irq_i,
+    output logic        irq_ack_o,
+    output logic  [4:0] irq_id_o,
     output logic        core_busy_o,
     input  logic        clock_gating_i,
     input  logic [31:0] boot_addr_i,
@@ -191,8 +193,8 @@ module core_region
 
         .irq_i           ( (|irq_i)          ),
         .irq_id_i        ( irq_id            ),
-        .irq_ack_o       (                   ),
-        .irq_id_o        (                   ),
+        .irq_ack_o       ( irq_ack_o         ),
+        .irq_id_o        ( irq_id_o          ),
 
         .debug_req_i     ( debug.req         ),
         .debug_gnt_o     ( debug.gnt         ),
@@ -248,8 +250,8 @@ module core_region
 
       .irq_i           ( (|irq_i)          ),
       .irq_id_i        ( irq_id            ),
-      .irq_ack_o       (                   ),
-      .irq_id_o        (                   ),
+      .irq_ack_o       ( irq_ack_o         ),
+      .irq_id_o        ( irq_id_o          ),
       .irq_sec_i       ( 1'b0              ),
       .sec_lvl_o       (                   ),
 

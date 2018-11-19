@@ -1,0 +1,17 @@
+tb:  # file list retrieved from ~/vcompile/rtl/vcompile_tb.sh
+  incdirs: [
+    .,
+    mem_dpi,
+    jtag_dpi
+  ]
+  files: [
+    pkg_spi.sv,
+    if_spi_slave.sv,
+    if_spi_master.sv,
+    uart.sv,
+    i2c_eeprom_model.sv,
+    tb.sv,
+    jtag_dpi.sv,
+    jtag_dpi/jtag_dpi.c,
+    mem_dpi/mem_dpi.c
+  ]
