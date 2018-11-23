@@ -18,14 +18,13 @@ echo "start vsim.tcl"
 
   echo "elaborate"
   
-irun -elaborate -cdslib ${SW_DIR}/../vsim/cds.lib -work tb ${SW_DIR}/../tb/tb.sv \
+irun -elaborate -cdslib ${SW_DIR}/../vsim/cds.lib -work tb ${SW_DIR}/../tb/tb.sv -snapshot tb_snapshot -update -forceelab -access +rwc  -timescale 1ns/1ps  -notimingchecks -lib_binding \
+										-coverage block -coverage expr -coverage fsm -coverage toggle -coverage functional -messages \
 										-incdir ${SW_DIR}/../rtl/includes \
-										-incdir ${SW_DIR}/../tb/ \
-										-access +rwc  -timescale 1ns/1ps \ 
-										-notimingchecks -lib_binding \
-										-coverage block -coverage expr -coverage fsm -coverage toggle -messages \
-										-update
-										
+										-incdir ${SW_DIR}/../tb/ 
+echo "here"	
+pwd	
+find ../../../../ -name "tb_snapshot*"
 										
 # set cmd "$cmd -sv_lib ./work/libri5cyv2sim"
 # eval $cmd

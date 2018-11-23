@@ -12,12 +12,20 @@ NextWord="0"
 rm uart.out
 rm -rf ./cov_work
 pwd
-irun -cdslib ${SW_DIR}/../vsim/cds.lib -work tb ${SW_DIR}/../tb/tb.sv -incdir ${SW_DIR}/../rtl/includes  -incdir ${SW_DIR}/../tb/  -access +rwc  -timescale 1ns/1ps  -notimingchecks -lib_binding -update -coverage block -coverage expr -coverage fsm -coverage toggle -messages
+irun -cdslib ${SW_DIR}/../vsim/cds.lib -work tb ${SW_DIR}/../tb/tb.sv -incdir ${SW_DIR}/../rtl/includes  -incdir ${SW_DIR}/../tb/  -access +rwc  -timescale 1ns/1ps  -notimingchecks -lib_binding -update -coverage block -coverage expr -coverage fsm -coverage toggle -coverage functional -messages
 
 
 dirname=${PWD##*/}
 ls
-mkdir ${SW_DIR}/../vsim/coverage/${dirname}
+
+if [ ! -d "${SW_DIR}/../vsim/coverage" ]; then
+  mkdir ${SW_DIR}/../vsim/coverage
+fi
+
+if [ ! -d "${SW_DIR}/../vsim/coverage/${dirname}" ]; then
+  mkdir ${SW_DIR}/../vsim/coverage/${dirname}
+fi
+
 mv cov_work/* ${SW_DIR}/../vsim/coverage/${dirname}
 pwd
 ls ${SW_DIR}/../vsim/coverage/${dirname}
