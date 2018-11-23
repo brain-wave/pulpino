@@ -23,7 +23,9 @@ vlib modelsim_libs
 rm -rf work
 vlib work
 
-rm cds.lib
+if ( -f "./cds.lib" ) then
+	rm cds.lib
+endif
 
 if ( -d "./INCA_libs/" ) then
 	rm -rf ./INCA_libs/
