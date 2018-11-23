@@ -54,7 +54,7 @@ ncvlog -q -sv -work ${LIB_NAME} -cdslib cds.lib -hdlvar hdl.var -incdir ${TB_PAT
 ncvlog -q -sv -work ${LIB_NAME} -cdslib cds.lib -hdlvar hdl.var -incdir ${TB_PATH} -incdir ${RTL_PATH}/includes/              ${TB_PATH}/tb.sv               || goto error
      echo "got here"                                                
 irun -compile -quiet -sv -work ${LIB_NAME}  -cdslib cds.lib    -incdir ${TB_PATH} -incdir ${TB_PATH}/jtag_dpi -top ${TB_PATH}/jtag_dpi.sv         || goto error
-     echo "${Yellow} got here"                                                
+     echo "${Blue} got here"                                                
 
 irun -compile -work ${LIB_NAME} -messages ${TB_PATH}/jtag_dpi/jtag_dpi.c || goto error
      echo "${Red} got here"                                                
