@@ -25,6 +25,12 @@ vlib work
 
 rm cds.lib
 
+if ( -d "./INCA_libs/" ) then
+	rm -rf ./INCA_libs/
+endif
+
+mkdir INCA_libs
+
 echo ""
 echo "${Green}--> Compiling PULPino Platform... ${NC}"
 echo ""
